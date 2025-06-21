@@ -95,7 +95,11 @@ public class OrganizationService
             _logger.LogDebug("构建 LLM 提示...");
             var desktopJson = await _scanService.GetDesktopJsonAsync(items);
             var preferencesJson = preferences.ToJsonString();
-            var prompt = _llmClient.BuildPrompt(currentProfile, desktopJson, preferencesJson);
+            // 增强 prompt，明确说明 folders 为已有分类
+            var desktopJsonWithNote =
+                "注意：desktopJson 中 folders 字段为桌面上已存在的文件夹，请优先考虑将合适的文件归入这些已有文件夹作为分类。\n" +
+                desktopJson;
+            var prompt = _llmClient.BuildPrompt(currentProfile, desktopJsonWithNote, preferencesJson);
 
             _logger.LogDebug("提示长度: {PromptLength} 字符，桌面 JSON 长度: {DesktopJsonLength} 字符",
                 prompt.Length, desktopJson.Length);
@@ -144,8 +148,24 @@ public class OrganizationService
     {
         var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
+        // 执行前过滤掉不存在的源文件/文件夹
+        var filteredOperations = plan.MoveOperations
+            .Where(op =>
+            {
+                var src = Path.Combine(desktopPath, op.Item);
+                if (!File.Exists(src) && !Directory.Exists(src))
+                {
+                    _logger.LogWarning("批量执行时跳过不存在的项目: {Item} -> {TargetFolder}", op.Item, op.TargetFolder);
+                    return false;
+                }
+                return true;
+            })
+            .ToList();
+
+        var filteredPlan = new Plan(plan.NewFolders, filteredOperations, plan.ModelUsed);
+
         // 直接执行计划，不中断，失败项后续处理
-        var result = await _executionService.ExecutePlanAsync(plan, desktopPath, progress, cancellationToken);
+        var result = await _executionService.ExecutePlanAsync(filteredPlan, desktopPath, progress, cancellationToken);
 
         // 记录未找到文件/文件夹的操作到日志
         if (result.FailedOperations != null && result.FailedOperations.Any())
@@ -306,7 +326,14 @@ public class OrganizationService
         try
         {
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            
+            var sourcePath = Path.Combine(desktopPath, operation.Item);
+
+            if (!File.Exists(sourcePath) && !Directory.Exists(sourcePath))
+            {
+                _logger.LogWarning("源文件或文件夹不存在，跳过操作: {Item} -> {TargetFolder}", operation.Item, operation.TargetFolder);
+                return;
+            }
+
             // Create a minimal plan with just this operation
             var tempPlan = new Plan
             {
@@ -326,11 +353,11 @@ public class OrganizationService
 
             // Execute the single operation
             var result = await _executionService.ExecutePlanAsync(tempPlan, desktopPath, null, CancellationToken.None);
-            
+
             if (!result.Success)
             {
                 var errorMessage = result.FailedOperations?.FirstOrDefault()?.ToString() ?? "Unknown error";
-                _logger.LogError("Failed to execute operation: {Item} -> {TargetFolder}. Error: {Error}", 
+                _logger.LogError("Failed to execute operation: {Item} -> {TargetFolder}. Error: {Error}",
                     operation.Item, operation.TargetFolder, errorMessage);
                 throw new InvalidOperationException($"Failed to execute operation: {operation.Item} -> {operation.TargetFolder}. {errorMessage}");
             }
