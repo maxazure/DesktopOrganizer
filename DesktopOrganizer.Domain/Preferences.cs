@@ -11,6 +11,11 @@ public class Preferences
     public bool AutoCreateFolders { get; init; } = true;
     public bool ConfirmBeforeExecution { get; init; } = true;
     public string Language { get; init; } = "en-US";
+    
+    // New natural language preference field
+    public string NaturalLanguagePreference { get; set; } = string.Empty;
+    public string LastUsedTemplate { get; set; } = string.Empty;
+    
     public DateTime LastModified { get; set; } = DateTime.Now;
 
     public Preferences() { }

@@ -225,4 +225,122 @@ public class OrganizationService
     {
         return await _planService.GetPreviewGroupsAsync(plan);
     }
+
+    /// <summary>
+    /// Generate organization plan using natural language preferences
+    /// </summary>
+    public async Task<Plan> GenerateOrganizationPlanAsync(List<Item> items, string combinedPrompt, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Generating organization plan with natural language preferences");
+
+        try
+        {
+            // Get current model profile
+            var profiles = await _modelProfileRepository.LoadAllAsync();
+            var currentProfile = profiles.FirstOrDefault();
+
+            if (currentProfile == null)
+            {
+                var error = "未找到可用的模型配置";
+                _logger.LogError(error);
+                throw new InvalidOperationException(error);
+            }
+
+            // Validate API key
+            var apiKey = await _credentialService.GetApiKeyAsync(currentProfile.KeyRef);
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                var error = "API 密钥未配置或为空";
+                _logger.LogError(error);
+                throw new InvalidOperationException(error);
+            }
+
+            _logger.LogDebug("Using combined prompt length: {PromptLength} characters", combinedPrompt.Length);
+
+            // Call LLM with the combined prompt
+            _logger.LogInformation("Calling LLM API to generate organization plan...");
+            var llmResponse = await _llmClient.ChatAsync(combinedPrompt, currentProfile, null, cancellationToken);
+
+            _logger.LogInformation("Received LLM response, length: {ResponseLength} characters", llmResponse.Length);
+            _logger.LogTrace("LLM response content: {LlmResponse}", llmResponse);
+
+            // Parse response
+            _logger.LogDebug("Parsing LLM response...");
+            var plan = await _planService.ParseLLMResponseAsync(llmResponse, items);
+
+            _logger.LogInformation("Successfully parsed plan with {FolderCount} folders, {OperationCount} move operations",
+                plan.NewFolders?.Count ?? 0, plan.MoveOperations?.Count ?? 0);
+
+            // Validate plan
+            _logger.LogDebug("Validating plan...");
+            var isValid = await _planService.ValidatePlanAsync(plan, items);
+            if (!isValid)
+            {
+                var error = "Generated organization plan is invalid or contains errors";
+                _logger.LogError(error);
+                throw new InvalidOperationException(error);
+            }
+
+            _logger.LogInformation("Organization plan generated and validated successfully");
+            return plan;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Organization plan generation was cancelled");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate organization plan");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Execute a single move operation
+    /// </summary>
+    public async Task ExecuteSingleOperationAsync(MoveOperation operation)
+    {
+        _logger.LogDebug("Executing single operation: {Item} -> {TargetFolder}", operation.Item, operation.TargetFolder);
+
+        try
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            
+            // Create a minimal plan with just this operation
+            var tempPlan = new Plan
+            {
+                MoveOperations = new List<MoveOperation> { operation },
+                NewFolders = new List<string>()
+            };
+
+            // Add the target folder to the plan if it's not empty
+            if (!string.IsNullOrEmpty(operation.TargetFolder))
+            {
+                var targetFolderPath = Path.Combine(desktopPath, operation.TargetFolder);
+                if (!Directory.Exists(targetFolderPath))
+                {
+                    tempPlan.NewFolders.Add(operation.TargetFolder);
+                }
+            }
+
+            // Execute the single operation
+            var result = await _executionService.ExecutePlanAsync(tempPlan, desktopPath, null, CancellationToken.None);
+            
+            if (!result.Success)
+            {
+                var errorMessage = result.FailedOperations?.FirstOrDefault()?.ToString() ?? "Unknown error";
+                _logger.LogError("Failed to execute operation: {Item} -> {TargetFolder}. Error: {Error}", 
+                    operation.Item, operation.TargetFolder, errorMessage);
+                throw new InvalidOperationException($"Failed to execute operation: {operation.Item} -> {operation.TargetFolder}. {errorMessage}");
+            }
+
+            _logger.LogDebug("Successfully executed operation: {Item} -> {TargetFolder}", operation.Item, operation.TargetFolder);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to execute single operation: {Item} -> {TargetFolder}", operation.Item, operation.TargetFolder);
+            throw;
+        }
+    }
 }

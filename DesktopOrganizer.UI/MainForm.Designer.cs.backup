@@ -1,0 +1,370 @@
+namespace DesktopOrganizer.UI
+{
+    partial class MainForm
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.toolStrip1 = new ToolStrip();
+            this.btnScan = new ToolStripButton();
+            this.btnAnalyze = new ToolStripButton();
+            this.btnExecute = new ToolStripButton();
+            this.btnUndo = new ToolStripButton();
+            this.toolStripSeparator1 = new ToolStripSeparator();
+            this.lblCurrentModel = new ToolStripLabel();
+            this.cmbCurrentModel = new ToolStripComboBox();
+            this.btnModelSettings = new ToolStripButton();
+
+            this.splitContainer1 = new SplitContainer();
+            this.splitContainer2 = new SplitContainer();
+            this.splitContainer3 = new SplitContainer();
+
+            this.groupBox1 = new GroupBox();
+            this.listViewOriginal = new ListView();
+            this.columnHeader1 = new ColumnHeader();
+            this.columnHeader2 = new ColumnHeader();
+            this.columnHeader3 = new ColumnHeader();
+            this.columnHeader4 = new ColumnHeader();
+
+            this.groupBox2 = new GroupBox();
+            this.richTextBoxLog = new RichTextBox();
+
+            this.groupBox3 = new GroupBox();
+            this.treeViewPreview = new TreeView();
+
+            this.groupBox4 = new GroupBox();
+            this.preferencesPane = new PreferencesPane();
+
+            this.statusStrip1 = new StatusStrip();
+            this.lblStatus = new ToolStripStatusLabel();
+            this.lblItemCount = new ToolStripStatusLabel();
+            this.progressBar = new ToolStripProgressBar();
+
+            this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.Panel2.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
+            this.SuspendLayout();
+
+            // toolStrip1
+            this.toolStrip1.Items.AddRange(new ToolStripItem[] {
+                this.btnScan,
+                this.btnAnalyze,
+                this.btnExecute,
+                this.btnUndo,
+                this.toolStripSeparator1,
+                this.lblCurrentModel,
+                this.cmbCurrentModel,
+                this.btnModelSettings});
+            this.toolStrip1.Location = new Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new Size(1200, 25);
+            this.toolStrip1.TabIndex = 0;
+            this.toolStrip1.Text = "toolStrip1";
+
+            // btnScan
+            this.btnScan.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            this.btnScan.Name = "btnScan";
+            this.btnScan.Size = new Size(37, 22);
+            this.btnScan.Text = "Scan";
+            this.btnScan.Click += new EventHandler(this.btnScan_Click);
+
+            // btnAnalyze
+            this.btnAnalyze.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            this.btnAnalyze.Name = "btnAnalyze";
+            this.btnAnalyze.Size = new Size(50, 22);
+            this.btnAnalyze.Text = "Analyze";
+            this.btnAnalyze.Click += new EventHandler(this.btnAnalyze_Click);
+
+            // btnExecute
+            this.btnExecute.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            this.btnExecute.Name = "btnExecute";
+            this.btnExecute.Size = new Size(50, 22);
+            this.btnExecute.Text = "Execute";
+            this.btnExecute.Click += new EventHandler(this.btnExecute_Click);
+
+            // btnUndo
+            this.btnUndo.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            this.btnUndo.Name = "btnUndo";
+            this.btnUndo.Size = new Size(37, 22);
+            this.btnUndo.Text = "Undo";
+            this.btnUndo.Click += new EventHandler(this.btnUndo_Click);
+
+            // toolStripSeparator1
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new Size(6, 25);
+
+            // lblCurrentModel
+            this.lblCurrentModel.Name = "lblCurrentModel";
+            this.lblCurrentModel.Size = new Size(90, 22);
+            this.lblCurrentModel.Text = "Current Model:";
+
+            // cmbCurrentModel
+            this.cmbCurrentModel.Name = "cmbCurrentModel";
+            this.cmbCurrentModel.Size = new Size(200, 25);
+            this.cmbCurrentModel.DropDown += new EventHandler(this.cmbCurrentModel_DropDownOpened);
+            this.cmbCurrentModel.SelectedIndexChanged += new EventHandler(this.cmbCurrentModel_SelectedIndexChanged);
+
+            // btnModelSettings
+            this.btnModelSettings.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            this.btnModelSettings.Name = "btnModelSettings";
+            this.btnModelSettings.Size = new Size(56, 22);
+            this.btnModelSettings.Text = "Settings";
+            this.btnModelSettings.Click += new EventHandler(this.btnModelSettings_Click);
+
+            // splitContainer1
+            this.splitContainer1.Dock = DockStyle.Fill;
+            this.splitContainer1.Location = new Point(0, 25);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = Orientation.Vertical;
+            this.splitContainer1.Panel1.Controls.Add(this.splitContainer2);
+            this.splitContainer1.Panel2.Controls.Add(this.groupBox4);
+            this.splitContainer1.Size = new Size(1200, 675);
+            this.splitContainer1.SplitterDistance = 475;
+            this.splitContainer1.TabIndex = 1;
+
+            // splitContainer2
+            this.splitContainer2.Dock = DockStyle.Fill;
+            this.splitContainer2.Location = new Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Panel1.Controls.Add(this.groupBox1);
+            this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
+            this.splitContainer2.Size = new Size(1200, 475);
+            this.splitContainer2.SplitterDistance = 400;
+            this.splitContainer2.TabIndex = 0;
+
+            // splitContainer3
+            this.splitContainer3.Dock = DockStyle.Fill;
+            this.splitContainer3.Location = new Point(0, 0);
+            this.splitContainer3.Name = "splitContainer3";
+            this.splitContainer3.Panel1.Controls.Add(this.groupBox2);
+            this.splitContainer3.Panel2.Controls.Add(this.groupBox3);
+            this.splitContainer3.Size = new Size(796, 475);
+            this.splitContainer3.SplitterDistance = 398;
+            this.splitContainer3.TabIndex = 0;
+
+            // groupBox1
+            this.groupBox1.Controls.Add(this.listViewOriginal);
+            this.groupBox1.Dock = DockStyle.Fill;
+            this.groupBox1.Location = new Point(0, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new Size(400, 475);
+            this.groupBox1.TabIndex = 0;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "① Original Items";
+
+            // listViewOriginal
+            this.listViewOriginal.Columns.AddRange(new ColumnHeader[] {
+                this.columnHeader1,
+                this.columnHeader2,
+                this.columnHeader3,
+                this.columnHeader4});
+            this.listViewOriginal.Dock = DockStyle.Fill;
+            this.listViewOriginal.FullRowSelect = true;
+            this.listViewOriginal.GridLines = true;
+            this.listViewOriginal.Location = new Point(3, 19);
+            this.listViewOriginal.Name = "listViewOriginal";
+            this.listViewOriginal.Size = new Size(394, 453);
+            this.listViewOriginal.TabIndex = 0;
+            this.listViewOriginal.UseCompatibleStateImageBehavior = false;
+            this.listViewOriginal.View = View.Details;
+
+            // columnHeader1
+            this.columnHeader1.Text = "Name";
+            this.columnHeader1.Width = 200;
+
+            // columnHeader2
+            this.columnHeader2.Text = "Type";
+            this.columnHeader2.Width = 60;
+
+            // columnHeader3
+            this.columnHeader3.Text = "Size";
+            this.columnHeader3.Width = 80;
+
+            // columnHeader4
+            this.columnHeader4.Text = "Modified";
+            this.columnHeader4.Width = 120;
+
+            // groupBox2
+            this.groupBox2.Controls.Add(this.richTextBoxLog);
+            this.groupBox2.Dock = DockStyle.Fill;
+            this.groupBox2.Location = new Point(0, 0);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new Size(398, 475);
+            this.groupBox2.TabIndex = 0;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "② Model Log";
+
+            // richTextBoxLog
+            this.richTextBoxLog.Dock = DockStyle.Fill;
+            this.richTextBoxLog.Location = new Point(3, 19);
+            this.richTextBoxLog.Name = "richTextBoxLog";
+            this.richTextBoxLog.ReadOnly = true;
+            this.richTextBoxLog.Size = new Size(392, 453);
+            this.richTextBoxLog.TabIndex = 0;
+            this.richTextBoxLog.Text = "";
+
+            // groupBox3
+            this.groupBox3.Controls.Add(this.treeViewPreview);
+            this.groupBox3.Dock = DockStyle.Fill;
+            this.groupBox3.Location = new Point(0, 0);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new Size(394, 475);
+            this.groupBox3.TabIndex = 0;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "③ Organization Preview";
+
+            // treeViewPreview
+            this.treeViewPreview.AllowDrop = true;
+            this.treeViewPreview.Dock = DockStyle.Fill;
+            this.treeViewPreview.Location = new Point(3, 19);
+            this.treeViewPreview.Name = "treeViewPreview";
+            this.treeViewPreview.Size = new Size(388, 453);
+            this.treeViewPreview.TabIndex = 0;
+
+            // groupBox4
+            this.groupBox4.Controls.Add(this.preferencesPane);
+            this.groupBox4.Dock = DockStyle.Fill;
+            this.groupBox4.Location = new Point(0, 0);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new Size(1200, 196);
+            this.groupBox4.TabIndex = 0;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "④ User Preferences";
+
+            // preferencesPane
+            this.preferencesPane.Dock = DockStyle.Fill;
+            this.preferencesPane.Location = new Point(3, 19);
+            this.preferencesPane.Name = "preferencesPane";
+            this.preferencesPane.Size = new Size(1194, 174);
+            this.preferencesPane.TabIndex = 0;
+
+            // statusStrip1
+            this.statusStrip1.Items.AddRange(new ToolStripItem[] {
+                this.lblStatus,
+                this.lblItemCount,
+                this.progressBar});
+            this.statusStrip1.Location = new Point(0, 700);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new Size(1200, 22);
+            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.Text = "statusStrip1";
+
+            // lblStatus
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new Size(39, 17);
+            this.lblStatus.Text = "Ready";
+
+            // lblItemCount
+            this.lblItemCount.Name = "lblItemCount";
+            this.lblItemCount.Size = new Size(49, 17);
+            this.lblItemCount.Text = "Items: 0";
+
+            // progressBar
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new Size(100, 16);
+
+            // MainForm
+            this.AutoScaleDimensions = new SizeF(7F, 15F);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(1200, 722);
+            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.statusStrip1);
+            this.Name = "MainForm";
+            this.Text = "Desktop Organizer - 桌面整理助手";
+            this.WindowState = FormWindowState.Maximized;
+
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            this.splitContainer3.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
+            this.splitContainer3.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
+        #endregion
+
+        private ToolStrip toolStrip1;
+        private ToolStripButton btnScan;
+        private ToolStripButton btnAnalyze;
+        private ToolStripButton btnExecute;
+        private ToolStripButton btnUndo;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripLabel lblCurrentModel;
+        private ToolStripComboBox cmbCurrentModel;
+        private ToolStripButton btnModelSettings;
+        private SplitContainer splitContainer1;
+        private SplitContainer splitContainer2;
+        private SplitContainer splitContainer3;
+        private GroupBox groupBox1;
+        private ListView listViewOriginal;
+        private ColumnHeader columnHeader1;
+        private ColumnHeader columnHeader2;
+        private ColumnHeader columnHeader3;
+        private ColumnHeader columnHeader4;
+        private GroupBox groupBox2;
+        private RichTextBox richTextBoxLog;
+        private GroupBox groupBox3;
+        private TreeView treeViewPreview;
+        private GroupBox groupBox4;
+        private PreferencesPane preferencesPane;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel lblStatus;
+        private ToolStripStatusLabel lblItemCount;
+        private ToolStripProgressBar progressBar;
+    }
+}

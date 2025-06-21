@@ -150,6 +150,12 @@ public class ExecutionEngine : IExecutionService
             var targetFolderPath = Path.Combine(desktopPath, operation.TargetFolder);
             var destinationPath = Path.Combine(targetFolderPath, operation.Item);
 
+            // Ensure target folder exists
+            if (!Directory.Exists(targetFolderPath))
+            {
+                Directory.CreateDirectory(targetFolderPath);
+            }
+
             // Handle name conflicts
             destinationPath = GetUniqueDestinationPath(destinationPath);
 
@@ -157,18 +163,25 @@ public class ExecutionEngine : IExecutionService
             operation.SourcePath = sourcePath;
             operation.DestinationPath = destinationPath;
 
-            // Move file or directory
-            if (File.Exists(sourcePath))
+            try
             {
-                File.Move(sourcePath, destinationPath);
+                // Move file or directory
+                if (File.Exists(sourcePath))
+                {
+                    File.Move(sourcePath, destinationPath);
+                }
+                else if (Directory.Exists(sourcePath))
+                {
+                    Directory.Move(sourcePath, destinationPath);
+                }
+                else
+                {
+                    throw new FileNotFoundException($"Source not found: {sourcePath}");
+                }
             }
-            else if (Directory.Exists(sourcePath))
+            catch (Exception ex)
             {
-                Directory.Move(sourcePath, destinationPath);
-            }
-            else
-            {
-                throw new FileNotFoundException($"Source not found: {sourcePath}");
+                throw new InvalidOperationException($"Failed to execute operation - {sourcePath} -> {destinationPath}: {ex.Message}", ex);
             }
         });
     }

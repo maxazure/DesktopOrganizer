@@ -19,18 +19,27 @@ internal static class Program
     [STAThread]
     static void Main()
     {
-        Application.SetHighDpiMode(HighDpiMode.SystemAware);
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
+        try
+        {
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-        // Build host with dependency injection
-        var host = CreateHostBuilder().Build();
+            // Build host with dependency injection
+            var host = CreateHostBuilder().Build();
 
-        // Get the main form from DI container
-        var mainForm = host.Services.GetRequiredService<MainForm>();
+            // Get the main form from DI container
+            var mainForm = host.Services.GetRequiredService<MainForm>();
 
-        // Run the application
-        Application.Run(mainForm);
+            // Run the application
+            Application.Run(mainForm);
+        }
+        catch (Exception ex)
+        {
+            // Show error message if startup fails
+            MessageBox.Show($"应用程序启动失败:\n\n{ex.Message}\n\n详细信息:\n{ex}", 
+                "启动错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private static IHostBuilder CreateHostBuilder()
@@ -65,19 +74,22 @@ internal static class Program
             {
                 // Domain services
                 services.AddSingleton<IDesktopScanService, FileSystemScanner>();
-                services.AddSingleton<IPlanPreviewService>(provider =>
-                    new PlanPreviewService(provider.GetService<ILogger<PlanPreviewService>>()));
+                services.AddSingleton<IPlanPreviewService, PlanPreviewService>();
                 services.AddSingleton<IExecutionService, ExecutionEngine>();
                 services.AddSingleton<IUndoService, UndoService>();
                 services.AddSingleton<ICredentialService, CredentialService>();
 
                 // Repositories
                 services.AddSingleton<IPreferencesRepository, PreferencesRepository>();
+                services.AddSingleton<PreferencesRepository>();
                 services.AddSingleton<IModelProfileRepository, ModelProfileRepository>();
+                services.AddSingleton<ModelProfileRepository>();
 
                 // Application services
                 services.AddSingleton<DesktopScanService>();
                 services.AddSingleton<OrganizationService>();
+                services.AddSingleton<PreferenceTemplateManager>();
+                services.AddSingleton<PreferenceProcessor>();
 
                 // LLM clients
                 services.AddHttpClient<DeepSeekClient>();
@@ -93,8 +105,7 @@ internal static class Program
 
                 // UI Forms
                 services.AddTransient<MainForm>();
-                services.AddTransient<PreferencesPane>();
-                services.AddTransient<ModelProfileDialog>();
+                services.AddTransient<SettingsForm>();
                 services.AddTransient<LogViewerForm>();
             });
     }

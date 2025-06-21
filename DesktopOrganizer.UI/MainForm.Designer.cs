@@ -1,3 +1,5 @@
+using DesktopOrganizer.UI.Controls;
+
 namespace DesktopOrganizer.UI
 {
     partial class MainForm
@@ -28,343 +30,391 @@ namespace DesktopOrganizer.UI
         /// </summary>
         private void InitializeComponent()
         {
-            this.toolStrip1 = new ToolStrip();
-            this.btnScan = new ToolStripButton();
-            this.btnAnalyze = new ToolStripButton();
-            this.btnExecute = new ToolStripButton();
-            this.btnUndo = new ToolStripButton();
-            this.toolStripSeparator1 = new ToolStripSeparator();
-            this.lblCurrentModel = new ToolStripLabel();
-            this.cmbCurrentModel = new ToolStripComboBox();
-            this.btnModelSettings = new ToolStripButton();
-
-            this.splitContainer1 = new SplitContainer();
-            this.splitContainer2 = new SplitContainer();
-            this.splitContainer3 = new SplitContainer();
-
-            this.groupBox1 = new GroupBox();
-            this.listViewOriginal = new ListView();
-            this.columnHeader1 = new ColumnHeader();
-            this.columnHeader2 = new ColumnHeader();
-            this.columnHeader3 = new ColumnHeader();
-            this.columnHeader4 = new ColumnHeader();
-
-            this.groupBox2 = new GroupBox();
-            this.richTextBoxLog = new RichTextBox();
-
-            this.groupBox3 = new GroupBox();
-            this.treeViewPreview = new TreeView();
-
-            this.groupBox4 = new GroupBox();
-            this.preferencesPane = new PreferencesPane();
-
-            this.statusStrip1 = new StatusStrip();
-            this.lblStatus = new ToolStripStatusLabel();
-            this.lblItemCount = new ToolStripStatusLabel();
-            this.progressBar = new ToolStripProgressBar();
-
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
-            this.splitContainer2.Panel1.SuspendLayout();
-            this.splitContainer2.Panel2.SuspendLayout();
-            this.splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
-            this.splitContainer3.Panel1.SuspendLayout();
-            this.splitContainer3.Panel2.SuspendLayout();
-            this.splitContainer3.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            this.groupBox4.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
-            this.SuspendLayout();
-
-            // toolStrip1
-            this.toolStrip1.Items.AddRange(new ToolStripItem[] {
-                this.btnScan,
-                this.btnAnalyze,
-                this.btnExecute,
-                this.btnUndo,
-                this.toolStripSeparator1,
-                this.lblCurrentModel,
-                this.cmbCurrentModel,
-                this.btnModelSettings});
-            this.toolStrip1.Location = new Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new Size(1200, 25);
-            this.toolStrip1.TabIndex = 0;
-            this.toolStrip1.Text = "toolStrip1";
-
-            // btnScan
-            this.btnScan.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            this.btnScan.Name = "btnScan";
-            this.btnScan.Size = new Size(37, 22);
-            this.btnScan.Text = "Scan";
-            this.btnScan.Click += new EventHandler(this.btnScan_Click);
-
-            // btnAnalyze
-            this.btnAnalyze.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            this.btnAnalyze.Name = "btnAnalyze";
-            this.btnAnalyze.Size = new Size(50, 22);
-            this.btnAnalyze.Text = "Analyze";
-            this.btnAnalyze.Click += new EventHandler(this.btnAnalyze_Click);
-
-            // btnExecute
-            this.btnExecute.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            this.btnExecute.Name = "btnExecute";
-            this.btnExecute.Size = new Size(50, 22);
-            this.btnExecute.Text = "Execute";
-            this.btnExecute.Click += new EventHandler(this.btnExecute_Click);
-
+            
+            mainPanel = new Panel();
+            headerPanel = new Panel();
+            lblTitle = new Label();
+            titleButtonPanel = new Panel();
+            btnSettings = new Button();
+            btnHelp = new Button();
+            btnMinimize = new Button();
+            contentPanel = new Panel();
+            fileCountPanel = new Panel();
+            lblFileCount = new Label();
+            preferenceInputPanel = new PreferenceInputPanel();
+            organizeButtonPanel = new Panel();
+            btnStartOrganize = new Button();
+            separatorPanel = new Panel();
+            lblPreviewTitle = new Label();
+            previewPanel = new FlowLayoutPanel();
+            actionButtonPanel = new Panel();
+            btnAdjustPlan = new Button();
+            btnExecutePlan = new Button();
+            btnUndo = new Button();
+            statusPanel = new Panel();
+            progressIndicator = new SimplifiedProgressIndicator();
+            
+            mainPanel.SuspendLayout();
+            headerPanel.SuspendLayout();
+            titleButtonPanel.SuspendLayout();
+            contentPanel.SuspendLayout();
+            fileCountPanel.SuspendLayout();
+            organizeButtonPanel.SuspendLayout();
+            separatorPanel.SuspendLayout();
+            actionButtonPanel.SuspendLayout();
+            statusPanel.SuspendLayout();
+            SuspendLayout();
+            
+            // 
+            // mainPanel
+            // 
+            mainPanel.BackColor = Color.FromArgb(249, 250, 251);
+            mainPanel.Controls.Add(contentPanel);
+            mainPanel.Controls.Add(headerPanel);
+            mainPanel.Dock = DockStyle.Fill;
+            mainPanel.Location = new Point(0, 0);
+            mainPanel.Name = "mainPanel";
+            mainPanel.Size = new Size(900, 700);
+            mainPanel.TabIndex = 0;
+            
+            // 
+            // headerPanel
+            // 
+            headerPanel.BackColor = Color.White;
+            headerPanel.Controls.Add(titleButtonPanel);
+            headerPanel.Controls.Add(lblTitle);
+            headerPanel.Dock = DockStyle.Top;
+            headerPanel.Location = new Point(0, 0);
+            headerPanel.Name = "headerPanel";
+            headerPanel.Size = new Size(900, 50);
+            headerPanel.TabIndex = 0;
+            
+            // 
+            // lblTitle
+            // 
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.FromArgb(31, 41, 55);
+            lblTitle.Location = new Point(20, 12);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(187, 26);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Desktop Organizer";
+            
+            // 
+            // titleButtonPanel
+            // 
+            titleButtonPanel.Controls.Add(btnMinimize);
+            titleButtonPanel.Controls.Add(btnHelp);
+            titleButtonPanel.Controls.Add(btnSettings);
+            titleButtonPanel.Dock = DockStyle.Right;
+            titleButtonPanel.Location = new Point(700, 0);
+            titleButtonPanel.Name = "titleButtonPanel";
+            titleButtonPanel.Size = new Size(200, 50);
+            titleButtonPanel.TabIndex = 1;
+            
+            // 
+            // btnSettings
+            // 
+            btnSettings.Anchor = AnchorStyles.None;
+            btnSettings.FlatAppearance.BorderSize = 0;
+            btnSettings.FlatStyle = FlatStyle.Flat;
+            btnSettings.Font = new Font("Microsoft YaHei UI", 9F);
+            btnSettings.Location = new Point(10, 12);
+            btnSettings.Name = "btnSettings";
+            btnSettings.Size = new Size(60, 26);
+            btnSettings.TabIndex = 0;
+            btnSettings.Text = "设置";
+            btnSettings.UseVisualStyleBackColor = true;
+            btnSettings.Click += btnSettings_Click;
+            
+            // 
+            // btnHelp
+            // 
+            btnHelp.Anchor = AnchorStyles.None;
+            btnHelp.FlatAppearance.BorderSize = 0;
+            btnHelp.FlatStyle = FlatStyle.Flat;
+            btnHelp.Font = new Font("Microsoft YaHei UI", 9F);
+            btnHelp.Location = new Point(75, 12);
+            btnHelp.Name = "btnHelp";
+            btnHelp.Size = new Size(60, 26);
+            btnHelp.TabIndex = 1;
+            btnHelp.Text = "帮助";
+            btnHelp.UseVisualStyleBackColor = true;
+            btnHelp.Click += btnHelp_Click;
+            
+            // 
+            // btnMinimize
+            // 
+            btnMinimize.Anchor = AnchorStyles.None;
+            btnMinimize.FlatAppearance.BorderSize = 0;
+            btnMinimize.FlatStyle = FlatStyle.Flat;
+            btnMinimize.Font = new Font("Microsoft YaHei UI", 9F);
+            btnMinimize.Location = new Point(140, 12);
+            btnMinimize.Name = "btnMinimize";
+            btnMinimize.Size = new Size(50, 26);
+            btnMinimize.TabIndex = 2;
+            btnMinimize.Text = "最小化";
+            btnMinimize.UseVisualStyleBackColor = true;
+            btnMinimize.Click += btnMinimize_Click;
+            
+            // 
+            // contentPanel
+            // 
+            contentPanel.Controls.Add(statusPanel);
+            contentPanel.Controls.Add(actionButtonPanel);
+            contentPanel.Controls.Add(previewPanel);
+            contentPanel.Controls.Add(separatorPanel);
+            contentPanel.Controls.Add(organizeButtonPanel);
+            contentPanel.Controls.Add(preferenceInputPanel);
+            contentPanel.Controls.Add(fileCountPanel);
+            contentPanel.Dock = DockStyle.Fill;
+            contentPanel.Location = new Point(0, 50);
+            contentPanel.Name = "contentPanel";
+            contentPanel.Padding = new Padding(20);
+            contentPanel.Size = new Size(900, 650);
+            contentPanel.TabIndex = 1;
+            
+            // 
+            // fileCountPanel
+            // 
+            fileCountPanel.Controls.Add(lblFileCount);
+            fileCountPanel.Dock = DockStyle.Top;
+            fileCountPanel.Location = new Point(20, 20);
+            fileCountPanel.Name = "fileCountPanel";
+            fileCountPanel.Size = new Size(860, 40);
+            fileCountPanel.TabIndex = 0;
+            
+            // 
+            // lblFileCount
+            // 
+            lblFileCount.AutoSize = true;
+            lblFileCount.Font = new Font("Microsoft YaHei UI", 12F, FontStyle.Bold);
+            lblFileCount.ForeColor = Color.FromArgb(31, 41, 55);
+            lblFileCount.Location = new Point(0, 10);
+            lblFileCount.Name = "lblFileCount";
+            lblFileCount.Size = new Size(203, 22);
+            lblFileCount.TabIndex = 0;
+            lblFileCount.Text = "📁 当前桌面文件：0 个文件";
+            
+            // 
+            // preferenceInputPanel
+            // 
+            preferenceInputPanel.BackColor = Color.Transparent;
+            preferenceInputPanel.Dock = DockStyle.Top;
+            preferenceInputPanel.Font = new Font("Microsoft YaHei UI", 9F);
+            preferenceInputPanel.Location = new Point(20, 60);
+            preferenceInputPanel.Margin = new Padding(5);
+            preferenceInputPanel.Name = "preferenceInputPanel";
+            preferenceInputPanel.Size = new Size(860, 150);
+            preferenceInputPanel.TabIndex = 1;
+            preferenceInputPanel.PreferenceChanged += PreferenceInputPanel_PreferenceChanged;
+            preferenceInputPanel.TemplateSelected += PreferenceInputPanel_TemplateSelected;
+            
+            // 
+            // organizeButtonPanel
+            // 
+            organizeButtonPanel.Controls.Add(btnStartOrganize);
+            organizeButtonPanel.Dock = DockStyle.Top;
+            organizeButtonPanel.Location = new Point(20, 210);
+            organizeButtonPanel.Name = "organizeButtonPanel";
+            organizeButtonPanel.Padding = new Padding(0, 15, 0, 0);
+            organizeButtonPanel.Size = new Size(860, 70);
+            organizeButtonPanel.TabIndex = 2;
+            
+            // 
+            // btnStartOrganize
+            // 
+            btnStartOrganize.Anchor = AnchorStyles.None;
+            btnStartOrganize.BackColor = Color.FromArgb(37, 99, 235);
+            btnStartOrganize.FlatAppearance.BorderSize = 0;
+            btnStartOrganize.FlatStyle = FlatStyle.Flat;
+            btnStartOrganize.Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold);
+            btnStartOrganize.ForeColor = Color.White;
+            btnStartOrganize.Location = new Point(350, 15);
+            btnStartOrganize.Name = "btnStartOrganize";
+            btnStartOrganize.Size = new Size(160, 45);
+            btnStartOrganize.TabIndex = 0;
+            btnStartOrganize.Text = "🚀 开始整理";
+            btnStartOrganize.UseVisualStyleBackColor = false;
+            btnStartOrganize.Click += btnStartOrganize_Click;
+            
+            // 
+            // separatorPanel
+            // 
+            separatorPanel.Controls.Add(lblPreviewTitle);
+            separatorPanel.Dock = DockStyle.Top;
+            separatorPanel.Location = new Point(20, 280);
+            separatorPanel.Name = "separatorPanel";
+            separatorPanel.Size = new Size(860, 40);
+            separatorPanel.TabIndex = 3;
+            
+            // 
+            // lblPreviewTitle
+            // 
+            lblPreviewTitle.AutoSize = true;
+            lblPreviewTitle.Font = new Font("Microsoft YaHei UI", 12F, FontStyle.Bold);
+            lblPreviewTitle.ForeColor = Color.FromArgb(31, 41, 55);
+            lblPreviewTitle.Location = new Point(0, 10);
+            lblPreviewTitle.Name = "lblPreviewTitle";
+            lblPreviewTitle.Size = new Size(141, 22);
+            lblPreviewTitle.TabIndex = 0;
+            lblPreviewTitle.Text = "📊 整理计划预览：";
+            lblPreviewTitle.Visible = false;
+            
+            // 
+            // previewPanel
+            // 
+            previewPanel.AutoScroll = true;
+            previewPanel.BackColor = Color.Transparent;
+            previewPanel.Dock = DockStyle.Fill;
+            previewPanel.FlowDirection = FlowDirection.LeftToRight;
+            previewPanel.Location = new Point(20, 320);
+            previewPanel.Name = "previewPanel";
+            previewPanel.Padding = new Padding(5);
+            previewPanel.Size = new Size(860, 230);
+            previewPanel.TabIndex = 4;
+            previewPanel.WrapContents = true;
+            
+            // 
+            // actionButtonPanel
+            // 
+            actionButtonPanel.Controls.Add(btnUndo);
+            actionButtonPanel.Controls.Add(btnExecutePlan);
+            actionButtonPanel.Controls.Add(btnAdjustPlan);
+            actionButtonPanel.Dock = DockStyle.Bottom;
+            actionButtonPanel.Location = new Point(20, 550);
+            actionButtonPanel.Name = "actionButtonPanel";
+            actionButtonPanel.Size = new Size(860, 50);
+            actionButtonPanel.TabIndex = 5;
+            actionButtonPanel.Visible = false;
+            
+            // 
+            // btnAdjustPlan
+            // 
+            btnAdjustPlan.BackColor = Color.FromArgb(156, 163, 175);
+            btnAdjustPlan.FlatAppearance.BorderSize = 0;
+            btnAdjustPlan.FlatStyle = FlatStyle.Flat;
+            btnAdjustPlan.Font = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
+            btnAdjustPlan.ForeColor = Color.White;
+            btnAdjustPlan.Location = new Point(0, 10);
+            btnAdjustPlan.Name = "btnAdjustPlan";
+            btnAdjustPlan.Size = new Size(120, 35);
+            btnAdjustPlan.TabIndex = 0;
+            btnAdjustPlan.Text = "✏️ 调整计划";
+            btnAdjustPlan.UseVisualStyleBackColor = false;
+            btnAdjustPlan.Click += btnAdjustPlan_Click;
+            
+            // 
+            // btnExecutePlan
+            // 
+            btnExecutePlan.BackColor = Color.FromArgb(5, 150, 105);
+            btnExecutePlan.FlatAppearance.BorderSize = 0;
+            btnExecutePlan.FlatStyle = FlatStyle.Flat;
+            btnExecutePlan.Font = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
+            btnExecutePlan.ForeColor = Color.White;
+            btnExecutePlan.Location = new Point(130, 10);
+            btnExecutePlan.Name = "btnExecutePlan";
+            btnExecutePlan.Size = new Size(120, 35);
+            btnExecutePlan.TabIndex = 1;
+            btnExecutePlan.Text = "✅ 执行整理";
+            btnExecutePlan.UseVisualStyleBackColor = false;
+            btnExecutePlan.Click += btnExecutePlan_Click;
+            
+            // 
             // btnUndo
-            this.btnUndo.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            this.btnUndo.Name = "btnUndo";
-            this.btnUndo.Size = new Size(37, 22);
-            this.btnUndo.Text = "Undo";
-            this.btnUndo.Click += new EventHandler(this.btnUndo_Click);
-
-            // toolStripSeparator1
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new Size(6, 25);
-
-            // lblCurrentModel
-            this.lblCurrentModel.Name = "lblCurrentModel";
-            this.lblCurrentModel.Size = new Size(90, 22);
-            this.lblCurrentModel.Text = "Current Model:";
-
-            // cmbCurrentModel
-            this.cmbCurrentModel.Name = "cmbCurrentModel";
-            this.cmbCurrentModel.Size = new Size(200, 25);
-            this.cmbCurrentModel.DropDown += new EventHandler(this.cmbCurrentModel_DropDownOpened);
-            this.cmbCurrentModel.SelectedIndexChanged += new EventHandler(this.cmbCurrentModel_SelectedIndexChanged);
-
-            // btnModelSettings
-            this.btnModelSettings.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            this.btnModelSettings.Name = "btnModelSettings";
-            this.btnModelSettings.Size = new Size(56, 22);
-            this.btnModelSettings.Text = "Settings";
-            this.btnModelSettings.Click += new EventHandler(this.btnModelSettings_Click);
-
-            // splitContainer1
-            this.splitContainer1.Dock = DockStyle.Fill;
-            this.splitContainer1.Location = new Point(0, 25);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = Orientation.Vertical;
-            this.splitContainer1.Panel1.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Panel2.Controls.Add(this.groupBox4);
-            this.splitContainer1.Size = new Size(1200, 675);
-            this.splitContainer1.SplitterDistance = 475;
-            this.splitContainer1.TabIndex = 1;
-
-            // splitContainer2
-            this.splitContainer2.Dock = DockStyle.Fill;
-            this.splitContainer2.Location = new Point(0, 0);
-            this.splitContainer2.Name = "splitContainer2";
-            this.splitContainer2.Panel1.Controls.Add(this.groupBox1);
-            this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer2.Size = new Size(1200, 475);
-            this.splitContainer2.SplitterDistance = 400;
-            this.splitContainer2.TabIndex = 0;
-
-            // splitContainer3
-            this.splitContainer3.Dock = DockStyle.Fill;
-            this.splitContainer3.Location = new Point(0, 0);
-            this.splitContainer3.Name = "splitContainer3";
-            this.splitContainer3.Panel1.Controls.Add(this.groupBox2);
-            this.splitContainer3.Panel2.Controls.Add(this.groupBox3);
-            this.splitContainer3.Size = new Size(796, 475);
-            this.splitContainer3.SplitterDistance = 398;
-            this.splitContainer3.TabIndex = 0;
-
-            // groupBox1
-            this.groupBox1.Controls.Add(this.listViewOriginal);
-            this.groupBox1.Dock = DockStyle.Fill;
-            this.groupBox1.Location = new Point(0, 0);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new Size(400, 475);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "① Original Items";
-
-            // listViewOriginal
-            this.listViewOriginal.Columns.AddRange(new ColumnHeader[] {
-                this.columnHeader1,
-                this.columnHeader2,
-                this.columnHeader3,
-                this.columnHeader4});
-            this.listViewOriginal.Dock = DockStyle.Fill;
-            this.listViewOriginal.FullRowSelect = true;
-            this.listViewOriginal.GridLines = true;
-            this.listViewOriginal.Location = new Point(3, 19);
-            this.listViewOriginal.Name = "listViewOriginal";
-            this.listViewOriginal.Size = new Size(394, 453);
-            this.listViewOriginal.TabIndex = 0;
-            this.listViewOriginal.UseCompatibleStateImageBehavior = false;
-            this.listViewOriginal.View = View.Details;
-
-            // columnHeader1
-            this.columnHeader1.Text = "Name";
-            this.columnHeader1.Width = 200;
-
-            // columnHeader2
-            this.columnHeader2.Text = "Type";
-            this.columnHeader2.Width = 60;
-
-            // columnHeader3
-            this.columnHeader3.Text = "Size";
-            this.columnHeader3.Width = 80;
-
-            // columnHeader4
-            this.columnHeader4.Text = "Modified";
-            this.columnHeader4.Width = 120;
-
-            // groupBox2
-            this.groupBox2.Controls.Add(this.richTextBoxLog);
-            this.groupBox2.Dock = DockStyle.Fill;
-            this.groupBox2.Location = new Point(0, 0);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new Size(398, 475);
-            this.groupBox2.TabIndex = 0;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "② Model Log";
-
-            // richTextBoxLog
-            this.richTextBoxLog.Dock = DockStyle.Fill;
-            this.richTextBoxLog.Location = new Point(3, 19);
-            this.richTextBoxLog.Name = "richTextBoxLog";
-            this.richTextBoxLog.ReadOnly = true;
-            this.richTextBoxLog.Size = new Size(392, 453);
-            this.richTextBoxLog.TabIndex = 0;
-            this.richTextBoxLog.Text = "";
-
-            // groupBox3
-            this.groupBox3.Controls.Add(this.treeViewPreview);
-            this.groupBox3.Dock = DockStyle.Fill;
-            this.groupBox3.Location = new Point(0, 0);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new Size(394, 475);
-            this.groupBox3.TabIndex = 0;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "③ Organization Preview";
-
-            // treeViewPreview
-            this.treeViewPreview.AllowDrop = true;
-            this.treeViewPreview.Dock = DockStyle.Fill;
-            this.treeViewPreview.Location = new Point(3, 19);
-            this.treeViewPreview.Name = "treeViewPreview";
-            this.treeViewPreview.Size = new Size(388, 453);
-            this.treeViewPreview.TabIndex = 0;
-
-            // groupBox4
-            this.groupBox4.Controls.Add(this.preferencesPane);
-            this.groupBox4.Dock = DockStyle.Fill;
-            this.groupBox4.Location = new Point(0, 0);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new Size(1200, 196);
-            this.groupBox4.TabIndex = 0;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "④ User Preferences";
-
-            // preferencesPane
-            this.preferencesPane.Dock = DockStyle.Fill;
-            this.preferencesPane.Location = new Point(3, 19);
-            this.preferencesPane.Name = "preferencesPane";
-            this.preferencesPane.Size = new Size(1194, 174);
-            this.preferencesPane.TabIndex = 0;
-
-            // statusStrip1
-            this.statusStrip1.Items.AddRange(new ToolStripItem[] {
-                this.lblStatus,
-                this.lblItemCount,
-                this.progressBar});
-            this.statusStrip1.Location = new Point(0, 700);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new Size(1200, 22);
-            this.statusStrip1.TabIndex = 2;
-            this.statusStrip1.Text = "statusStrip1";
-
-            // lblStatus
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new Size(39, 17);
-            this.lblStatus.Text = "Ready";
-
-            // lblItemCount
-            this.lblItemCount.Name = "lblItemCount";
-            this.lblItemCount.Size = new Size(49, 17);
-            this.lblItemCount.Text = "Items: 0";
-
-            // progressBar
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new Size(100, 16);
-
+            // 
+            btnUndo.BackColor = Color.FromArgb(217, 119, 6);
+            btnUndo.FlatAppearance.BorderSize = 0;
+            btnUndo.FlatStyle = FlatStyle.Flat;
+            btnUndo.Font = new Font("Microsoft YaHei UI", 10F, FontStyle.Bold);
+            btnUndo.ForeColor = Color.White;
+            btnUndo.Location = new Point(260, 10);
+            btnUndo.Name = "btnUndo";
+            btnUndo.Size = new Size(120, 35);
+            btnUndo.TabIndex = 2;
+            btnUndo.Text = "↶ 撤销操作";
+            btnUndo.UseVisualStyleBackColor = false;
+            btnUndo.Enabled = false;
+            btnUndo.Click += btnUndo_Click;
+            
+            // 
+            // statusPanel
+            // 
+            statusPanel.Controls.Add(progressIndicator);
+            statusPanel.Dock = DockStyle.Bottom;
+            statusPanel.Location = new Point(20, 600);
+            statusPanel.Name = "statusPanel";
+            statusPanel.Size = new Size(860, 30);
+            statusPanel.TabIndex = 6;
+            statusPanel.Visible = false;
+            
+            // 
+            // progressIndicator
+            // 
+            progressIndicator.BackColor = Color.FromArgb(249, 250, 251);
+            progressIndicator.Dock = DockStyle.Fill;
+            progressIndicator.Font = new Font("Microsoft YaHei UI", 9F);
+            progressIndicator.Location = new Point(0, 0);
+            progressIndicator.Name = "progressIndicator";
+            progressIndicator.Size = new Size(860, 30);
+            progressIndicator.TabIndex = 0;
+            progressIndicator.CancelRequested += ProgressIndicator_CancelRequested;
+            
+            // 
             // MainForm
-            this.AutoScaleDimensions = new SizeF(7F, 15F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(1200, 722);
-            this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.statusStrip1);
-            this.Name = "MainForm";
-            this.Text = "Desktop Organizer - 桌面整理助手";
-            this.WindowState = FormWindowState.Maximized;
-
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            this.splitContainer2.Panel1.ResumeLayout(false);
-            this.splitContainer2.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
-            this.splitContainer2.ResumeLayout(false);
-            this.splitContainer3.Panel1.ResumeLayout(false);
-            this.splitContainer3.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
-            this.splitContainer3.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox4.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            // 
+            AutoScaleDimensions = new SizeF(7F, 17F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(249, 250, 251);
+            ClientSize = new Size(900, 700);
+            Controls.Add(mainPanel);
+            Font = new Font("Microsoft YaHei UI", 9F);
+            // Icon = (Icon)resources.GetObject("$this.Icon"); // Removed to fix resource issue
+            MinimumSize = new Size(800, 600);
+            Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Desktop Organizer";
+            Load += MainForm_Load;
+            
+            mainPanel.ResumeLayout(false);
+            headerPanel.ResumeLayout(false);
+            headerPanel.PerformLayout();
+            titleButtonPanel.ResumeLayout(false);
+            contentPanel.ResumeLayout(false);
+            fileCountPanel.ResumeLayout(false);
+            fileCountPanel.PerformLayout();
+            organizeButtonPanel.ResumeLayout(false);
+            separatorPanel.ResumeLayout(false);
+            separatorPanel.PerformLayout();
+            actionButtonPanel.ResumeLayout(false);
+            statusPanel.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
 
-        private ToolStrip toolStrip1;
-        private ToolStripButton btnScan;
-        private ToolStripButton btnAnalyze;
-        private ToolStripButton btnExecute;
-        private ToolStripButton btnUndo;
-        private ToolStripSeparator toolStripSeparator1;
-        private ToolStripLabel lblCurrentModel;
-        private ToolStripComboBox cmbCurrentModel;
-        private ToolStripButton btnModelSettings;
-        private SplitContainer splitContainer1;
-        private SplitContainer splitContainer2;
-        private SplitContainer splitContainer3;
-        private GroupBox groupBox1;
-        private ListView listViewOriginal;
-        private ColumnHeader columnHeader1;
-        private ColumnHeader columnHeader2;
-        private ColumnHeader columnHeader3;
-        private ColumnHeader columnHeader4;
-        private GroupBox groupBox2;
-        private RichTextBox richTextBoxLog;
-        private GroupBox groupBox3;
-        private TreeView treeViewPreview;
-        private GroupBox groupBox4;
-        private PreferencesPane preferencesPane;
-        private StatusStrip statusStrip1;
-        private ToolStripStatusLabel lblStatus;
-        private ToolStripStatusLabel lblItemCount;
-        private ToolStripProgressBar progressBar;
+        private Panel mainPanel;
+        private Panel headerPanel;
+        private Label lblTitle;
+        private Panel titleButtonPanel;
+        private Button btnSettings;
+        private Button btnHelp;
+        private Button btnMinimize;
+        private Panel contentPanel;
+        private Panel fileCountPanel;
+        private Label lblFileCount;
+        private PreferenceInputPanel preferenceInputPanel;
+        private Panel organizeButtonPanel;
+        private Button btnStartOrganize;
+        private Panel separatorPanel;
+        private Label lblPreviewTitle;
+        private FlowLayoutPanel previewPanel;
+        private Panel actionButtonPanel;
+        private Button btnAdjustPlan;
+        private Button btnExecutePlan;
+        private Button btnUndo;
+        private Panel statusPanel;
+        private SimplifiedProgressIndicator progressIndicator;
     }
 }

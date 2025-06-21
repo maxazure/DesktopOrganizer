@@ -44,9 +44,61 @@ public class PlanPreviewService : IPlanPreviewService
 
                 var newFolders = new List<string>();
                 var moveOperations = new List<MoveOperation>();
+                var planFolders = new List<PlanFolder>();
 
-                // Parse new_folders
-                if (root.TryGetProperty("new_folders", out var foldersElement))
+                // Try new format first (folders array)
+                if (root.TryGetProperty("folders", out var foldersArrayElement) && foldersArrayElement.ValueKind == JsonValueKind.Array)
+                {
+                    _logger?.LogDebug("Parsing new folder format with 'folders' array");
+                    
+                    foreach (var folderElement in foldersArrayElement.EnumerateArray())
+                    {
+                        if (folderElement.TryGetProperty("name", out var nameElement))
+                        {
+                            var folderName = nameElement.GetString() ?? "";
+                            if (!string.IsNullOrEmpty(folderName))
+                            {
+                                var planFolder = new PlanFolder
+                                {
+                                    Name = folderName,
+                                    Description = folderElement.TryGetProperty("description", out var descElement) ? descElement.GetString() : "",
+                                    KeepOnDesktop = folderElement.TryGetProperty("keepOnDesktop", out var keepElement) && keepElement.GetBoolean()
+                                };
+
+                                // Parse files array
+                                if (folderElement.TryGetProperty("files", out var filesElement) && filesElement.ValueKind == JsonValueKind.Array)
+                                {
+                                    var files = new List<string>();
+                                    foreach (var fileElement in filesElement.EnumerateArray())
+                                    {
+                                        var fileName = fileElement.GetString();
+                                        if (!string.IsNullOrEmpty(fileName))
+                                        {
+                                            files.Add(fileName);
+                                            
+                                            // Create move operations for backwards compatibility
+                                            if (!planFolder.KeepOnDesktop)
+                                            {
+                                                moveOperations.Add(new MoveOperation(fileName, folderName));
+                                            }
+                                        }
+                                    }
+                                    planFolder.Files = files;
+                                }
+
+                                planFolders.Add(planFolder);
+                                
+                                // Add to new folders list if not keeping on desktop
+                                if (!planFolder.KeepOnDesktop)
+                                {
+                                    newFolders.Add(folderName);
+                                }
+                            }
+                        }
+                    }
+                }
+                // Fallback to old format
+                else if (root.TryGetProperty("new_folders", out var foldersElement))
                 {
                     foreach (var folder in foldersElement.EnumerateArray())
                     {
@@ -77,10 +129,12 @@ public class PlanPreviewService : IPlanPreviewService
                     }
                 }
 
-                _logger?.LogInformation("成功解析JSON，新文件夹: {FolderCount}，移动操作: {OperationCount}",
-                    newFolders.Count, moveOperations.Count);
+                _logger?.LogInformation("成功解析JSON，新文件夹: {FolderCount}，移动操作: {OperationCount}，计划文件夹: {PlanFolderCount}",
+                    newFolders.Count, moveOperations.Count, planFolders.Count);
 
-                return new Plan(newFolders, moveOperations, "LLM Generated");
+                var plan = new Plan(newFolders, moveOperations, "LLM Generated");
+                plan.Folders = planFolders;
+                return plan;
             }
             catch (JsonException ex)
             {

@@ -1,427 +1,523 @@
 using DesktopOrganizer.App.Services;
 using DesktopOrganizer.Domain;
-using Microsoft.Extensions.Logging;
+using DesktopOrganizer.Infrastructure.Repositories;
+using DesktopOrganizer.UI.Controls;
 using DesktopOrganizer.UI.Logging;
+using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace DesktopOrganizer.UI;
 
 /// <summary>
-/// Main application window
+/// Simplified main application window with modern UI
 /// </summary>
 public partial class MainForm : Form
 {
     private readonly OrganizationService _organizationService;
-    private readonly IModelProfileRepository _modelProfileRepository;
-    private readonly ICredentialService _credentialService;
+    private readonly DesktopScanService _desktopScanService;
+    private readonly IPlanPreviewService _planPreviewService;
+    private readonly IUndoService _undoService;
+    private readonly PreferenceTemplateManager _templateManager;
+    private readonly PreferenceProcessor _preferenceProcessor;
+    private readonly PreferencesRepository _preferencesRepository;
+    private readonly ModelProfileRepository _modelProfileRepository;
     private readonly ILogger<MainForm> _logger;
 
     private List<Item> _currentItems = new();
     private Plan? _currentPlan;
+    private AppState _currentState = AppState.Ready;
     private CancellationTokenSource? _cancellationTokenSource;
     private LogViewerForm? _logViewerForm;
+    private string _currentPreference = string.Empty;
 
-    public MainForm(OrganizationService organizationService, IModelProfileRepository modelProfileRepository, ICredentialService credentialService, ILogger<MainForm> logger)
+    public MainForm(
+        OrganizationService organizationService,
+        DesktopScanService desktopScanService,
+        IPlanPreviewService planPreviewService,
+        IUndoService undoService,
+        PreferenceTemplateManager templateManager,
+        PreferenceProcessor preferenceProcessor,
+        PreferencesRepository preferencesRepository,
+        ModelProfileRepository modelProfileRepository,
+        ILogger<MainForm> logger)
     {
         _organizationService = organizationService;
+        _desktopScanService = desktopScanService;
+        _planPreviewService = planPreviewService;
+        _undoService = undoService;
+        _templateManager = templateManager;
+        _preferenceProcessor = preferenceProcessor;
+        _preferencesRepository = preferencesRepository;
         _modelProfileRepository = modelProfileRepository;
-        _credentialService = credentialService;
         _logger = logger;
+
         InitializeComponent();
-        InitializeUIAsync();
+        ApplyModernStyling();
     }
 
-    private async void InitializeUIAsync()
+    private async void MainForm_Load(object sender, EventArgs e)
     {
         try
         {
-            _logger.LogInformation("初始化主界面...");
-            await LoadCurrentModelAsync();
-            await RefreshDesktopItemsAsync();
-            UpdateUI();
-            _logger.LogInformation("主界面初始化完成");
+            _logger.LogInformation("Initializing main form...");
+            
+            // Load templates for preference input panel
+            preferenceInputPanel.Templates = _templateManager.Templates;
+            
+            // Start desktop scanning
+            await RefreshDesktopScanAsync();
+            
+            // Update UI state
+            UpdateUIForState(_currentState);
+            
+            _logger.LogInformation("Main form initialization completed");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "初始化主界面时发生错误");
+            _logger.LogError(ex, "Failed to initialize main form");
             ShowError($"初始化错误: {ex.Message}");
         }
     }
 
-    private async void btnScan_Click(object sender, EventArgs e)
+    private void ApplyModernStyling()
     {
-        await ExecuteAsync(async () =>
-        {
-            await RefreshDesktopItemsAsync();
-            UpdateUI();
-        }, "Scanning desktop...");
+        // Apply rounded corners to main action button
+        btnStartOrganize.Region = CreateRoundedRegion(btnStartOrganize.Size, 8);
+        
+        // Apply rounded corners to action buttons
+        btnAdjustPlan.Region = CreateRoundedRegion(btnAdjustPlan.Size, 6);
+        btnExecutePlan.Region = CreateRoundedRegion(btnExecutePlan.Size, 6);
+        btnUndo.Region = CreateRoundedRegion(btnUndo.Size, 6);
+        
+        // Add tooltips for better user experience
+        AddTooltips();
     }
 
-    private async void btnAnalyze_Click(object sender, EventArgs e)
+    private void AddTooltips()
     {
-        _logger.LogInformation("用户点击分析按钮");
-
-        await ExecuteAsync(async () =>
-        {
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            var progress = new Progress<string>(token =>
-            {
-                if (InvokeRequired)
-                {
-                    Invoke(() => AppendToLog(token));
-                }
-                else
-                {
-                    AppendToLog(token);
-                }
-            });
-
-            _logger.LogInformation("开始生成整理方案...");
-            _currentPlan = await _organizationService.GenerateOrganizationPlanAsync(
-                progress, _cancellationTokenSource.Token);
-
-            _logger.LogInformation("整理方案生成完成，开始显示预览");
-            await DisplayPlanPreviewAsync(_currentPlan);
-            UpdateUI();
-
-        }, "使用 LLM 分析中...");
+        var toolTip = new ToolTip();
+        toolTip.SetToolTip(btnStartOrganize, "开始AI智能整理 (Ctrl+Enter)");
+        toolTip.SetToolTip(btnSettings, "打开设置窗口 (Ctrl+,)");
+        toolTip.SetToolTip(btnHelp, "查看应用日志");
+        toolTip.SetToolTip(btnMinimize, "最小化窗口");
+        toolTip.SetToolTip(btnAdjustPlan, "返回修改整理偏好");
+        toolTip.SetToolTip(btnExecutePlan, "执行当前整理计划");
+        toolTip.SetToolTip(btnUndo, "撤销上次整理操作 (Ctrl+Z)");
+        toolTip.SetToolTip(lblFileCount, "按F5刷新桌面文件扫描");
     }
 
-    private async void btnExecute_Click(object sender, EventArgs e)
+    private Region CreateRoundedRegion(Size size, int radius)
     {
-        if (_currentPlan == null)
-        {
-            ShowError("No plan available. Please analyze first.");
-            return;
-        }
-
-        var result = MessageBox.Show(
-            "Are you sure you want to execute this organization plan? This will move files on your desktop.",
-            "Confirm Execution",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question);
-
-        if (result != DialogResult.Yes)
-            return;
-
-        await ExecuteAsync(async () =>
-        {
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            var progress = new Progress<ExecutionProgress>(prog =>
-            {
-                if (InvokeRequired)
-                {
-                    Invoke(() => UpdateExecutionProgress(prog));
-                }
-                else
-                {
-                    UpdateExecutionProgress(prog);
-                }
-            });
-
-            var execResult = await _organizationService.ExecutePlanAsync(
-                _currentPlan, progress, _cancellationTokenSource.Token);
-
-            if (execResult.Success)
-            {
-                ShowInfo($"Organization completed successfully! Moved {execResult.CompletedOperations.Count} items.");
-                await RefreshDesktopItemsAsync();
-                _currentPlan = null;
-            }
-            else
-            {
-                ShowError($"Organization failed: {execResult.ErrorMessage}");
-            }
-
-            UpdateUI();
-
-        }, "Executing organization plan...");
+        var path = new System.Drawing.Drawing2D.GraphicsPath();
+        path.AddArc(0, 0, radius, radius, 180, 90);
+        path.AddArc(size.Width - radius, 0, radius, radius, 270, 90);
+        path.AddArc(size.Width - radius, size.Height - radius, radius, radius, 0, 90);
+        path.AddArc(0, size.Height - radius, radius, radius, 90, 90);
+        path.CloseAllFigures();
+        return new Region(path);
     }
 
-    private async void btnUndo_Click(object sender, EventArgs e)
+    private async Task RefreshDesktopScanAsync()
     {
-        var hasUndo = await _organizationService.HasUndoDataAsync();
-        if (!hasUndo)
-        {
-            ShowError("No undo data available.");
-            return;
-        }
-
-        var result = MessageBox.Show(
-            "Are you sure you want to undo the last organization operation?",
-            "Confirm Undo",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question);
-
-        if (result != DialogResult.Yes)
-            return;
-
-        await ExecuteAsync(async () =>
-        {
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            var progress = new Progress<ExecutionProgress>(prog =>
-            {
-                if (InvokeRequired)
-                {
-                    Invoke(() => UpdateExecutionProgress(prog));
-                }
-                else
-                {
-                    UpdateExecutionProgress(prog);
-                }
-            });
-
-            var success = await _organizationService.UndoLastOperationAsync(
-                progress, _cancellationTokenSource.Token);
-
-            if (success)
-            {
-                ShowInfo("Undo completed successfully!");
-                await RefreshDesktopItemsAsync();
-            }
-            else
-            {
-                ShowError("Undo operation failed.");
-            }
-
-            UpdateUI();
-
-        }, "Undoing last operation...");
-    }
-
-    private async void cmbCurrentModel_DropDownOpened(object sender, EventArgs e)
-    {
-        await LoadModelProfilesAsync();
-    }
-
-    private async void cmbCurrentModel_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (cmbCurrentModel.SelectedItem is ModelProfile selectedProfile)
-        {
-            await _modelProfileRepository.SetDefaultAsync(selectedProfile.Id);
-        }
-    }
-
-    private async void btnModelSettings_Click(object sender, EventArgs e)
-    {
-        using var dialog = new ModelProfileDialog(_modelProfileRepository, _credentialService);
-        if (dialog.ShowDialog() == DialogResult.OK)
-        {
-            await LoadCurrentModelAsync();
-            await LoadModelProfilesAsync();
-        }
-    }
-
-    private void btnViewLogs_Click(object sender, EventArgs e)
-    {
-        if (_logViewerForm == null || _logViewerForm.IsDisposed)
-        {
-            _logViewerForm = new LogViewerForm();
-
-            // 注册到全局日志查看器提供程序
-            GlobalLogViewerProvider.RegisterLogViewer(_logViewerForm);
-        }
-
-        _logViewerForm.Show();
-        _logViewerForm.BringToFront();
-    }
-
-    private async Task RefreshDesktopItemsAsync()
-    {
-        _currentItems = await _organizationService.ScanDesktopAsync();
-
-        // Update original items list
-        listViewOriginal.Items.Clear();
-        foreach (var item in _currentItems)
-        {
-            var listItem = new ListViewItem(item.Name);
-            listItem.SubItems.Add(item.IsDirectory ? "Folder" : item.Extension);
-            listItem.SubItems.Add(item.IsDirectory ? "" : FormatFileSize(item.Size));
-            listItem.SubItems.Add(item.ModifiedTime.ToString("yyyy-MM-dd HH:mm"));
-            listItem.Tag = item;
-            listViewOriginal.Items.Add(listItem);
-        }
-
-        // Update statistics
-        var stats = await _organizationService.GetDesktopStatisticsAsync();
-        lblItemCount.Text = $"Items: {stats.GetValueOrDefault("Total", 0)}";
-    }
-
-    private async Task DisplayPlanPreviewAsync(Plan plan)
-    {
-        treeViewPreview.Nodes.Clear();
-
-        var groups = await _organizationService.GetPlanPreviewAsync(plan);
-
-        foreach (var group in groups)
-        {
-            var folderNode = new TreeNode(group.Key) { Tag = group.Key };
-
-            foreach (var item in group.Value)
-            {
-                var itemNode = new TreeNode(item) { Tag = item };
-                folderNode.Nodes.Add(itemNode);
-            }
-
-            treeViewPreview.Nodes.Add(folderNode);
-        }
-
-        treeViewPreview.ExpandAll();
-    }
-
-    private async Task LoadCurrentModelAsync()
-    {
-        var currentModel = await _modelProfileRepository.GetDefaultAsync();
-        if (currentModel != null)
-        {
-            lblCurrentModel.Text = $"Current Model: {currentModel.Name}";
-        }
-        else
-        {
-            lblCurrentModel.Text = "Current Model: None configured";
-        }
-    }
-
-    private async Task LoadModelProfilesAsync()
-    {
-        var profiles = await _modelProfileRepository.LoadAllAsync();
-
-        cmbCurrentModel.Items.Clear();
-        foreach (var profile in profiles)
-        {
-            cmbCurrentModel.Items.Add(profile);
-        }
-
-        var defaultProfile = profiles.FirstOrDefault(p => p.IsDefault);
-        if (defaultProfile != null)
-        {
-            cmbCurrentModel.SelectedItem = defaultProfile;
-        }
-    }
-
-    private async Task ExecuteAsync(Func<Task> action, string statusText)
-    {
-        _logger.LogDebug("开始执行操作: {StatusText}", statusText);
-
         try
         {
-            SetUIEnabled(false);
-            lblStatus.Text = statusText;
-
-            await action();
-
-            lblStatus.Text = "就绪";
-            _logger.LogDebug("操作执行成功: {StatusText}", statusText);
-        }
-        catch (OperationCanceledException)
-        {
-            lblStatus.Text = "已取消";
-            _logger.LogWarning("操作被取消: {StatusText}", statusText);
+            _logger.LogInformation("Scanning desktop files...");
+            
+            _currentItems = await _desktopScanService.ScanDesktopAsync();
+            
+            // Update file count display
+            lblFileCount.Text = $"📁 当前桌面文件：{_currentItems.Count} 个文件";
+            
+            _logger.LogInformation("Found {Count} desktop files", _currentItems.Count);
         }
         catch (Exception ex)
         {
-            var errorMessage = $"错误: {ex.Message}";
-            _logger.LogError(ex, "执行操作时发生错误: {StatusText}", statusText);
+            _logger.LogError(ex, "Failed to scan desktop");
+            ShowError($"扫描桌面时出错: {ex.Message}");
+        }
+    }
 
-            // 为常见错误提供更友好的提示
-            if (ex.Message.Contains("API key"))
-            {
-                errorMessage = "API 密钥错误，请检查模型配置中的 API 密钥设置";
-            }
-            else if (ex.Message.Contains("timeout") || ex.Message.Contains("超时"))
-            {
-                errorMessage = "请求超时，请检查网络连接或尝试增加超时时间";
-            }
-            else if (ex.Message.Contains("Invalid response format") || ex.Message.Contains("响应格式"))
-            {
-                errorMessage = "API 响应格式错误，请检查模型配置或稍后重试";
-            }
+    private void UpdateUIForState(AppState state)
+    {
+        _currentState = state;
 
-            ShowError(errorMessage);
-            lblStatus.Text = "错误";
+        switch (state)
+        {
+            case AppState.Ready:
+                btnStartOrganize.Enabled = true;
+                btnStartOrganize.Text = "🚀 开始整理";
+                preferenceInputPanel.ReadOnly = false;
+
+                lblPreviewTitle.Visible = false;
+                actionButtonPanel.Visible = false;
+                statusPanel.Visible = false;
+
+                // Clear preview panel
+                previewPanel.Controls.Clear();
+                break;
+
+            case AppState.Processing:
+                btnStartOrganize.Enabled = false;
+                btnStartOrganize.Text = "处理中...";
+                preferenceInputPanel.ReadOnly = true;
+
+                statusPanel.Visible = true;
+                progressIndicator.SetIndeterminateProgress("AI正在分析文件并生成整理计划...");
+                progressIndicator.ShowCancelButton = true;
+                break;
+
+            case AppState.PreviewReady:
+                btnStartOrganize.Enabled = true;
+                btnStartOrganize.Text = "🔄 重新分析";
+                preferenceInputPanel.ReadOnly = false;
+
+                lblPreviewTitle.Visible = true;
+                actionButtonPanel.Visible = true;
+                statusPanel.Visible = false;
+
+                btnExecutePlan.Enabled = true;
+                btnAdjustPlan.Enabled = true;
+                break;
+
+            case AppState.Executing:
+                btnStartOrganize.Enabled = false;
+                preferenceInputPanel.ReadOnly = true;
+                actionButtonPanel.Visible = false;
+
+                statusPanel.Visible = true;
+                progressIndicator.ShowCancelButton = false;
+                break;
+
+            case AppState.Completed:
+                btnStartOrganize.Enabled = true;
+                btnStartOrganize.Text = "🚀 开始整理";
+                preferenceInputPanel.ReadOnly = false;
+
+                lblPreviewTitle.Visible = false;
+                actionButtonPanel.Visible = false;
+                statusPanel.Visible = false;
+
+                btnUndo.Enabled = _undoService.HasUndoDataAsync().GetAwaiter().GetResult();
+
+                // Clear preview and refresh desktop scan
+                previewPanel.Controls.Clear();
+                _ = RefreshDesktopScanAsync();
+                break;
+        }
+    }
+
+    private async void btnStartOrganize_Click(object sender, EventArgs e)
+    {
+        await StartOrganizationAsync();
+    }
+
+    private async Task StartOrganizationAsync()
+    {
+        if (!preferenceInputPanel.HasValidPreference())
+        {
+            preferenceInputPanel.ShowValidationError("请输入整理偏好或选择模板");
+            return;
+        }
+
+        try
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+            UpdateUIForState(AppState.Processing);
+
+            _currentPreference = preferenceInputPanel.PreferenceText;
+            
+            // Generate organization plan using AI
+            var combinedPrompt = _preferenceProcessor.CombineWithPrompt(_currentPreference, _currentItems);
+            _currentPlan = await _organizationService.GenerateOrganizationPlanAsync(_currentItems, combinedPrompt, _cancellationTokenSource.Token);
+
+            if (_currentPlan?.Folders?.Any() == true)
+            {
+                // Display preview
+                DisplayPlanPreview(_currentPlan);
+                UpdateUIForState(AppState.PreviewReady);
+                
+                _logger.LogInformation("Organization plan generated with {FolderCount} folders", _currentPlan.Folders.Count);
+            }
+            else
+            {
+                UpdateUIForState(AppState.Ready);
+                ShowInfo("未能生成有效的整理计划，请尝试调整您的偏好描述。");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Organization plan generation was cancelled");
+            UpdateUIForState(AppState.Ready);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate organization plan");
+            UpdateUIForState(AppState.Ready);
+            ShowError($"生成整理计划时出错: {ex.Message}");
         }
         finally
         {
-            SetUIEnabled(true);
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
         }
     }
 
-    private void SetUIEnabled(bool enabled)
+    private void DisplayPlanPreview(Plan plan)
     {
-        btnScan.Enabled = enabled;
-        btnAnalyze.Enabled = enabled && _currentItems.Any();
-        btnExecute.Enabled = enabled && _currentPlan != null;
-        btnUndo.Enabled = enabled; // Will be checked async
+        previewPanel.Controls.Clear();
 
-        if (!enabled)
+        if (plan.Folders == null || !plan.Folders.Any())
         {
-            progressBar.Style = ProgressBarStyle.Marquee;
+            var noPreviewLabel = new Label
+            {
+                Text = "没有生成预览",
+                Font = new Font("Microsoft YaHei UI", 10F),
+                ForeColor = Color.FromArgb(107, 114, 128),
+                AutoSize = true
+            };
+            previewPanel.Controls.Add(noPreviewLabel);
+            return;
         }
-        else
+
+        foreach (var folder in plan.Folders)
         {
-            progressBar.Style = ProgressBarStyle.Continuous;
-            progressBar.Value = 0;
+            var card = new FolderPreviewCard
+            {
+                FolderName = folder.Name,
+                Description = folder.Description ?? "",
+                FileList = folder.Files?.ToList() ?? new List<string>(),
+                KeepOnDesktop = folder.KeepOnDesktop,
+                Size = new Size(280, 200),
+                Margin = new Padding(5)
+            };
+
+            card.KeepOnDesktopChanged += (s, args) =>
+            {
+                // Update the plan when user changes keep on desktop setting
+                var planFolder = plan.Folders.FirstOrDefault(f => f.Name == args.FolderName);
+                if (planFolder != null)
+                {
+                    planFolder.KeepOnDesktop = args.KeepOnDesktop;
+                }
+            };
+
+            previewPanel.Controls.Add(card);
         }
     }
 
-    private void UpdateUI()
+    private async void btnExecutePlan_Click(object sender, EventArgs e)
     {
-        SetUIEnabled(true);
-        CheckUndoAvailabilityAsync();
+        if (_currentPlan == null) return;
+
+        var confirmResult = MessageBox.Show(
+            $"确定要执行整理计划吗？\n\n将会移动 {_currentPlan.GetMoveOperations().Count()} 个文件到相应文件夹。",
+            "确认执行",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question);
+
+        if (confirmResult != DialogResult.Yes) return;
+
+        try
+        {
+            UpdateUIForState(AppState.Executing);
+            
+            var operations = _currentPlan.GetMoveOperations().ToList();
+            
+            // Execute with progress updates
+            for (int i = 0; i < operations.Count; i++)
+            {
+                var operation = operations[i];
+                await _organizationService.ExecuteSingleOperationAsync(operation);
+                
+                var progress = (int)((i + 1) * 100.0 / operations.Count);
+                progressIndicator.SetProgress(progress, $"正在整理文件 ({i + 1}/{operations.Count})...");
+                
+                await Task.Delay(50); // Small delay for UI responsiveness
+            }
+
+            progressIndicator.SetComplete("整理完成！");
+            await Task.Delay(1500); // Show completion message
+            
+            UpdateUIForState(AppState.Completed);
+            
+            ShowInfo($"整理完成！已移动 {operations.Count} 个文件。");
+            _logger.LogInformation("Organization completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to execute organization plan");
+            UpdateUIForState(AppState.PreviewReady);
+            ShowError($"执行整理计划时出错: {ex.Message}");
+        }
     }
 
-    private async void CheckUndoAvailabilityAsync()
+    private void btnAdjustPlan_Click(object sender, EventArgs e)
+    {
+        // Allow user to modify preferences and regenerate
+        UpdateUIForState(AppState.Ready);
+        preferenceInputPanel.FocusOnInput();
+    }
+
+    private async void btnUndo_Click(object sender, EventArgs e)
+    {
+        if (!await _undoService.HasUndoDataAsync()) return;
+
+        var confirmResult = MessageBox.Show(
+            "确定要撤销上次的整理操作吗？",
+            "确认撤销",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question);
+
+        if (confirmResult != DialogResult.Yes) return;
+
+        try
+        {
+            UpdateUIForState(AppState.Executing);
+            progressIndicator.SetIndeterminateProgress("正在撤销操作...");
+            
+            await _undoService.ExecuteUndoAsync();
+            
+            progressIndicator.SetComplete("撤销完成！");
+            await Task.Delay(1500);
+            
+            UpdateUIForState(AppState.Ready);
+            ShowInfo("撤销操作完成！");
+            
+            _logger.LogInformation("Undo operation completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to undo operation");
+            UpdateUIForState(AppState.Ready);
+            ShowError($"撤销操作时出错: {ex.Message}");
+        }
+    }
+
+    private void btnSettings_Click(object sender, EventArgs e)
     {
         try
         {
-            var hasUndo = await _organizationService.HasUndoDataAsync();
-            btnUndo.Enabled = hasUndo;
+            using var settingsForm = new SettingsForm(
+                _preferencesRepository,
+                _modelProfileRepository,
+                _templateManager,
+                _logger as ILogger<SettingsForm> ?? throw new InvalidCastException("Logger类型不匹配"));
+                
+            if (settingsForm.ShowDialog() == DialogResult.OK)
+            {
+                // Reload templates after settings change
+                preferenceInputPanel.Templates = _templateManager.Templates;
+                _logger.LogInformation("Settings updated");
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            btnUndo.Enabled = false;
+            _logger.LogError(ex, "Failed to open settings");
+            ShowError($"打开设置时出错: {ex.Message}");
         }
     }
 
-    private void UpdateExecutionProgress(ExecutionProgress progress)
+    private void btnHelp_Click(object sender, EventArgs e)
     {
-        progressBar.Style = ProgressBarStyle.Continuous;
-        progressBar.Maximum = 100;
-        progressBar.Value = Math.Min(100, (int)progress.PercentComplete);
-
-        lblStatus.Text = progress.CurrentOperation ?? progress.Status ?? "Processing...";
-    }
-
-    private void AppendToLog(string text)
-    {
-        richTextBoxLog.AppendText(text);
-        richTextBoxLog.ScrollToCaret();
-    }
-
-    private static void ShowError(string message)
-    {
-        MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    }
-
-    private static void ShowInfo(string message)
-    {
-        MessageBox.Show(message, "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-    }
-
-    private static string FormatFileSize(long bytes)
-    {
-        string[] suffixes = { "B", "KB", "MB", "GB", "TB" };
-        int counter = 0;
-        decimal number = bytes;
-        while (Math.Round(number / 1024) >= 1)
+        try
         {
-            number /= 1024;
-            counter++;
+            // Open log viewer as help for now
+            if (_logViewerForm == null || _logViewerForm.IsDisposed)
+            {
+                _logViewerForm = new LogViewerForm();
+            }
+            
+            _logViewerForm.Show();
+            _logViewerForm.BringToFront();
         }
-        return $"{number:n1} {suffixes[counter]}";
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to open help");
+            ShowError($"打开帮助时出错: {ex.Message}");
+        }
+    }
+
+    private void btnMinimize_Click(object sender, EventArgs e)
+    {
+        WindowState = FormWindowState.Minimized;
+    }
+
+    private void PreferenceInputPanel_PreferenceChanged(object? sender, PreferenceChangedEventArgs e)
+    {
+        // Update state when preference changes
+        if (_currentState == AppState.PreviewReady && !string.IsNullOrWhiteSpace(e.PreferenceText))
+        {
+            // If user changes preference while preview is shown, reset to ready state
+            UpdateUIForState(AppState.Ready);
+        }
+    }
+
+    private void PreferenceInputPanel_TemplateSelected(object? sender, TemplateSelectedEventArgs e)
+    {
+        _logger.LogInformation("Template selected: {TemplateName}", e.Template.Name);
+    }
+
+    private void ProgressIndicator_CancelRequested(object? sender, EventArgs e)
+    {
+        _cancellationTokenSource?.Cancel();
+        UpdateUIForState(AppState.Ready);
+    }
+
+    private void ShowError(string message)
+    {
+        MessageBox.Show(message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+
+    private void ShowInfo(string message)
+    {
+        MessageBox.Show(message, "信息", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        try
+        {
+            _cancellationTokenSource?.Cancel();
+            _logViewerForm?.Close();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during form closing");
+        }
+        
+        base.OnFormClosing(e);
+    }
+
+    // Keyboard shortcuts
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        switch (keyData)
+        {
+            case Keys.Control | Keys.Enter:
+                if (_currentState == AppState.Ready && btnStartOrganize.Enabled)
+                {
+                    _ = StartOrganizationAsync();
+                    return true;
+                }
+                break;
+                
+            case Keys.Control | Keys.Z:
+                if (btnUndo.Enabled)
+                {
+                    btnUndo_Click(this, EventArgs.Empty);
+                    return true;
+                }
+                break;
+                
+            case Keys.F5:
+                _ = RefreshDesktopScanAsync();
+                return true;
+                
+            case Keys.Control | Keys.Oemcomma: // Ctrl+,
+                btnSettings_Click(this, EventArgs.Empty);
+                return true;
+        }
+        
+        return base.ProcessCmdKey(ref msg, keyData);
     }
 }

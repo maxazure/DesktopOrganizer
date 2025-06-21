@@ -9,6 +9,9 @@ public class Plan
     public List<MoveOperation> MoveOperations { get; init; } = new();
     public DateTime CreatedAt { get; init; } = DateTime.Now;
     public string? ModelUsed { get; init; }
+    
+    // New folder structure for enhanced UI
+    public List<PlanFolder>? Folders { get; set; } = new();
 
     public Plan() { }
 
@@ -34,6 +37,11 @@ public class Plan
             .GroupBy(op => op.TargetFolder)
             .ToDictionary(g => g.Key, g => g.Select(op => op.Item).ToList());
     }
+
+    public IEnumerable<MoveOperation> GetMoveOperations()
+    {
+        return MoveOperations ?? new List<MoveOperation>();
+    }
 }
 
 /// <summary>
@@ -57,4 +65,26 @@ public class MoveOperation
     }
 
     public override string ToString() => $"{Item} → {TargetFolder}";
+}
+
+/// <summary>
+/// Represents a folder in the organization plan with detailed information
+/// </summary>
+public class PlanFolder
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public List<string>? Files { get; set; } = new();
+    public bool KeepOnDesktop { get; set; } = false;
+    public string? Path { get; set; }
+}
+
+/// <summary>
+/// Represents a new folder to be created
+/// </summary>
+public class NewFolder
+{
+    public string Name { get; set; } = string.Empty;
+    public string Path { get; set; } = string.Empty;
+    public string? Description { get; set; }
 }

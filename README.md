@@ -58,31 +58,26 @@ DesktopOrganizer.sln
    dotnet run --project DesktopOrganizer.UI
    ```
 
-### First-Time Setup
+### 使用方法（极简流程）
 
-1. **Configure Model Profile**:
-   - Click "Settings" in the toolbar
-   - Add a new profile with your preferred LLM provider
-   - Enter your API key securely
+1. **首次设置**：
+   - 点击右上角"设置"按钮
+   - 选择AI提供商并输入API密钥
+   - 保存设置
 
-2. **Set Preferences**:
-   - Configure folder rules in the preferences panel
-   - Choose from quick templates or create custom rules
-   - Adjust file size limits and ignored extensions
+2. **描述整理偏好**：
+   - 在文本框中用自然语言描述你的需求
+   - 例如："将设计相关快捷方式留在桌面，文档按项目分类"
+   - 或点击"使用模板"选择预设偏好
 
-3. **Scan Desktop**:
-   - Click "Scan" to analyze your desktop files
-   - Review the file list in the original items panel
+3. **一键整理**：
+   - 点击"🚀 开始整理"按钮
+   - AI会自动分析桌面文件并生成整理方案
+   - 预览整理计划，可拖拽调整
 
-4. **Generate Organization Plan**:
-   - Click "Analyze" to get AI recommendations
-   - Watch the streaming log as the LLM processes your files
-   - Review the suggested organization in the preview tree
-
-5. **Execute or Adjust**:
-   - Drag and drop items between folders to adjust the plan
-   - Click "Execute" to organize your files
-   - Use "Undo" if you need to revert changes
+4. **执行或撤销**：
+   - 点击"✅ 执行整理"完成文件整理
+   - 如需要可点击"↶ 撤销操作"恢复原状
 
 ## 🔧 Configuration
 
