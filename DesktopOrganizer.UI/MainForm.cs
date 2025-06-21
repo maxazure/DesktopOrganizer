@@ -127,10 +127,11 @@ public partial class MainForm : Form
             
             _currentItems = await _desktopScanService.ScanDesktopAsync();
             
-            // Update file count display
-            lblFileCount.Text = $"📁 当前桌面文件：{_currentItems.Count} 个文件";
+            // 只统计文件数量，不包含文件夹
+            int fileCount = _currentItems.Count(i => !i.IsDirectory);
+            lblFileCount.Text = $"📁 当前桌面文件：{fileCount} 个文件";
             
-            _logger.LogInformation("Found {Count} desktop files", _currentItems.Count);
+            _logger.LogInformation("Found {Count} desktop files", fileCount);
         }
         catch (Exception ex)
         {
@@ -220,9 +221,18 @@ public partial class MainForm : Form
 
     private async Task StartOrganizationAsync()
     {
+        // 只传递文件，不包含文件夹
+        var fileItems = _currentItems.Where(i => !i.IsDirectory).ToList();
+
         if (!preferenceInputPanel.HasValidPreference())
         {
             preferenceInputPanel.ShowValidationError("请输入整理偏好或选择模板");
+            return;
+        }
+
+        if (fileItems.Count == 0)
+        {
+            ShowInfo("没有需要整理的文件。");
             return;
         }
 
@@ -234,8 +244,9 @@ public partial class MainForm : Form
             _currentPreference = preferenceInputPanel.PreferenceText;
             
             // Generate organization plan using AI
-            var combinedPrompt = _preferenceProcessor.CombineWithPrompt(_currentPreference, _currentItems);
-            _currentPlan = await _organizationService.GenerateOrganizationPlanAsync(_currentItems, combinedPrompt, _cancellationTokenSource.Token);
+            // 只传递文件，不包含文件夹
+            var combinedPrompt = _preferenceProcessor.CombineWithPrompt(_currentPreference, fileItems);
+            _currentPlan = await _organizationService.GenerateOrganizationPlanAsync(fileItems, combinedPrompt, _cancellationTokenSource.Token);
 
             if (_currentPlan?.Folders?.Any() == true)
             {

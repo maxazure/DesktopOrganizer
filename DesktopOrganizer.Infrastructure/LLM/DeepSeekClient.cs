@@ -19,6 +19,8 @@ public class DeepSeekClient : BaseLLMClient
     {
         _credentialService = credentialService;
         _logger = logger;
+        // 设置默认超时时间，避免后续请求中动态修改
+        _httpClient.Timeout = TimeSpan.FromSeconds(60);
     }
 
     public override async Task<string> ChatAsync(string prompt, ModelProfile profile,
@@ -68,7 +70,8 @@ public class DeepSeekClient : BaseLLMClient
             _logger.LogTrace("请求体内容: {RequestBody}", json);
 
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            _httpClient.Timeout = TimeSpan.FromSeconds(profile.TimeoutSeconds);
+            // 移除此处的 Timeout 设置，避免多线程冲突
+            // _httpClient.Timeout = TimeSpan.FromSeconds(profile.TimeoutSeconds);
 
             _logger.LogInformation("发送 HTTP 请求到 DeepSeek API...");
             var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);

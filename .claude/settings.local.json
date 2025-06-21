@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(dotnet build)",
+      "Bash(ls:*)",
+      "Bash(dotnet build:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" build --verbosity detailed 2 >& 1)",
+      "Bash(\"/mnt/d/projects/DesktopOrganizer/DesktopOrganizer.UI/bin/Debug/net8.0-windows/DesktopOrganizer.UI.exe\" 2 >& 1)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" build --verbosity normal 2 >& 1)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" build --verbosity normal)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" build --verbosity quiet)",
+      "Bash(./test-startup.bat)",
+      "Bash(timeout:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}

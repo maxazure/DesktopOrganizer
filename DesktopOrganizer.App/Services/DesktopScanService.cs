@@ -19,7 +19,8 @@ public class DesktopScanService
     public async Task<List<Item>> ScanDesktopAsync()
     {
         var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        return await ScanDesktopAsync(desktopPath);
+        // 只扫描桌面根目录，不递归
+        return await _scanService.ScanDirectoryAsync(desktopPath, false);
     }
 
     public async Task<List<Item>> ScanDesktopAsync(string desktopPath)
@@ -46,7 +47,7 @@ public class DesktopScanService
         var desktopData = new
         {
             scan_time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            total_items = items.Count,
+            total_items = items.Count(i => !i.IsDirectory),
             files = items.Where(i => !i.IsDirectory).Select(i => new
             {
                 name = i.Name,
@@ -55,12 +56,8 @@ public class DesktopScanService
                 modified = i.ModifiedTime.ToString("yyyy-MM-dd HH:mm:ss"),
                 is_shortcut = i.IsShortcut,
                 target = i.Target
-            }),
-            folders = items.Where(i => i.IsDirectory).Select(i => new
-            {
-                name = i.Name,
-                modified = i.ModifiedTime.ToString("yyyy-MM-dd HH:mm:ss")
             })
+            // 不包含 folders 字段，完全不提交文件夹信息
         };
 
         return System.Text.Json.JsonSerializer.Serialize(desktopData, new System.Text.Json.JsonSerializerOptions
@@ -72,7 +69,8 @@ public class DesktopScanService
     public async Task<int> GetItemCountAsync()
     {
         var items = await ScanDesktopAsync();
-        return items.Count;
+        // 只统计文件数量，不包含文件夹
+        return items.Count(i => !i.IsDirectory);
     }
 
     public async Task<Dictionary<string, int>> GetItemStatisticsAsync()
@@ -81,7 +79,8 @@ public class DesktopScanService
 
         var stats = new Dictionary<string, int>
         {
-            ["Total"] = items.Count,
+            // "Total" 只统计文件数量，不包含文件夹
+            ["Total"] = items.Count(i => !i.IsDirectory),
             ["Files"] = items.Count(i => !i.IsDirectory),
             ["Folders"] = items.Count(i => i.IsDirectory),
             ["Shortcuts"] = items.Count(i => i.IsShortcut)

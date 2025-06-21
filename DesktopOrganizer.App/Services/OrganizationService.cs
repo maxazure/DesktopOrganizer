@@ -67,7 +67,9 @@ public class OrganizationService
         {
             // Get desktop items and preferences
             _logger.LogDebug("获取桌面项目和用户偏好设置...");
-            var items = await _scanService.ScanDesktopAsync();
+            var allItems = await _scanService.ScanDesktopAsync();
+            // 只处理文件，不包括目录
+            var items = allItems.Where(i => !i.IsDirectory).ToList();
             var preferences = await _preferencesRepository.LoadAsync();
             var currentProfile = await _modelProfileRepository.GetDefaultAsync();
 
@@ -325,6 +327,13 @@ public class OrganizationService
 
         try
         {
+            // 新增：跳过源和目标相同的操作
+            if (string.Equals(operation.Item, operation.TargetFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("源和目标文件夹相同，跳过操作: {Item} -> {TargetFolder}", operation.Item, operation.TargetFolder);
+                return;
+            }
+
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var sourcePath = Path.Combine(desktopPath, operation.Item);
 
@@ -392,21 +401,10 @@ public class OrganizationService
                 await ReleaseFolderRecursiveAsync(directory, desktopPath, movedFiles);
             }
 
-            // Remove empty directories
+            // 递归删除所有空文件夹（包括子文件夹和根文件夹）
             foreach (var directory in directories)
             {
-                try
-                {
-                    if (Directory.Exists(directory) && !Directory.EnumerateFileSystemEntries(directory).Any())
-                    {
-                        Directory.Delete(directory, true);
-                        _logger.LogDebug("Removed empty directory: {Directory}", directory);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to remove directory: {Directory}", directory);
-                }
+                DeleteEmptyDirectoriesRecursive(directory);
             }
 
             _logger.LogInformation("Folder release completed. Moved {FileCount} files", movedFiles.Count);
@@ -480,5 +478,33 @@ public class OrganizationService
         while (File.Exists(newPath));
 
         return newPath;
+    }
+
+    /// <summary>
+    /// 递归删除所有空文件夹（包括子文件夹和根文件夹）
+    /// </summary>
+    /// <param name="folderPath">要检查的文件夹路径</param>
+    private void DeleteEmptyDirectoriesRecursive(string folderPath)
+    {
+        try
+        {
+            // 先递归处理所有子文件夹
+            var subdirectories = Directory.GetDirectories(folderPath);
+            foreach (var subdirectory in subdirectories)
+            {
+                DeleteEmptyDirectoriesRecursive(subdirectory);
+            }
+
+            // 如果当前文件夹已空，则删除
+            if (!Directory.EnumerateFileSystemEntries(folderPath).Any())
+            {
+                Directory.Delete(folderPath, false);
+                _logger.LogDebug("递归删除空文件夹: {Directory}", folderPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "递归删除空文件夹失败: {Directory}", folderPath);
+        }
     }
 }
