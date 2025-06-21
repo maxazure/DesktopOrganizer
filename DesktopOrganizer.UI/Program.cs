@@ -85,10 +85,10 @@ internal static class Program
                 services.AddHttpClient<AnthropicClient>();
 
                 // LLM client factory/resolver
-                // 使用本地模拟LLM客户端，便于测试
+                // 恢复为真实 LLM 客户端（默认 DeepSeek，可根据需要切换）
                 services.AddSingleton<ILLMClient>(provider =>
                 {
-                    return new LocalMockLLMClient("respones.json");
+                    return provider.GetRequiredService<DeepSeekClient>();
                 });
 
                 // UI Forms
