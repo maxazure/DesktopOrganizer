@@ -343,4 +343,115 @@ public class OrganizationService
             throw;
         }
     }
+
+    /// <summary>
+    /// Release all files from folders on desktop to desktop root
+    /// </summary>
+    public async Task ReleaseFoldersAsync()
+    {
+        _logger.LogInformation("Starting folder release operation");
+
+        try
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var movedFiles = new List<string>();
+            
+            // Get all directories on desktop
+            var directories = Directory.GetDirectories(desktopPath, "*", SearchOption.TopDirectoryOnly);
+            
+            foreach (var directory in directories)
+            {
+                _logger.LogDebug("Processing directory: {Directory}", directory);
+                await ReleaseFolderRecursiveAsync(directory, desktopPath, movedFiles);
+            }
+
+            // Remove empty directories
+            foreach (var directory in directories)
+            {
+                try
+                {
+                    if (Directory.Exists(directory) && !Directory.EnumerateFileSystemEntries(directory).Any())
+                    {
+                        Directory.Delete(directory, true);
+                        _logger.LogDebug("Removed empty directory: {Directory}", directory);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to remove directory: {Directory}", directory);
+                }
+            }
+
+            _logger.LogInformation("Folder release completed. Moved {FileCount} files", movedFiles.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to release folders");
+            throw;
+        }
+    }
+
+    private async Task ReleaseFolderRecursiveAsync(string folderPath, string desktopPath, List<string> movedFiles)
+    {
+        await Task.Run(() =>
+        {
+            try
+            {
+                // Get all files in current folder
+                var files = Directory.GetFiles(folderPath);
+                foreach (var file in files)
+                {
+                    var fileName = Path.GetFileName(file);
+                    var destinationPath = Path.Combine(desktopPath, fileName);
+                    
+                    // Handle name conflicts by adding numbers
+                    destinationPath = GetUniqueFileName(destinationPath);
+                    
+                    try
+                    {
+                        File.Move(file, destinationPath);
+                        movedFiles.Add(destinationPath);
+                        _logger.LogTrace("Moved file: {Source} -> {Destination}", file, destinationPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to move file: {File}", file);
+                    }
+                }
+
+                // Process subdirectories recursively
+                var subdirectories = Directory.GetDirectories(folderPath);
+                foreach (var subdirectory in subdirectories)
+                {
+                    ReleaseFolderRecursiveAsync(subdirectory, desktopPath, movedFiles).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to process folder: {Folder}", folderPath);
+            }
+        });
+    }
+
+    private static string GetUniqueFileName(string originalPath)
+    {
+        if (!File.Exists(originalPath))
+            return originalPath;
+
+        var directory = Path.GetDirectoryName(originalPath) ?? string.Empty;
+        var nameWithoutExtension = Path.GetFileNameWithoutExtension(originalPath);
+        var extension = Path.GetExtension(originalPath);
+
+        var counter = 1;
+        string newPath;
+        do
+        {
+            var newName = $"{nameWithoutExtension} ({counter}){extension}";
+            newPath = Path.Combine(directory, newName);
+            counter++;
+        }
+        while (File.Exists(newPath));
+
+        return newPath;
+    }
 }

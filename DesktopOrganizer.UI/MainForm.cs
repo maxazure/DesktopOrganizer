@@ -81,8 +81,9 @@ public partial class MainForm : Form
 
     private void ApplyModernStyling()
     {
-        // Apply rounded corners to main action button
+        // Apply rounded corners to main action buttons
         btnStartOrganize.Region = CreateRoundedRegion(btnStartOrganize.Size, 8);
+        btnReleaseFolders.Region = CreateRoundedRegion(btnReleaseFolders.Size, 8);
         
         // Apply rounded corners to action buttons
         btnAdjustPlan.Region = CreateRoundedRegion(btnAdjustPlan.Size, 6);
@@ -97,6 +98,7 @@ public partial class MainForm : Form
     {
         var toolTip = new ToolTip();
         toolTip.SetToolTip(btnStartOrganize, "开始AI智能整理 (Ctrl+Enter)");
+        toolTip.SetToolTip(btnReleaseFolders, "将所有文件夹中的文件移到桌面 (Ctrl+Shift+R)");
         toolTip.SetToolTip(btnSettings, "打开设置窗口 (Ctrl+,)");
         toolTip.SetToolTip(btnHelp, "查看应用日志");
         toolTip.SetToolTip(btnMinimize, "最小化窗口");
@@ -146,6 +148,7 @@ public partial class MainForm : Form
             case AppState.Ready:
                 btnStartOrganize.Enabled = true;
                 btnStartOrganize.Text = "🚀 开始整理";
+                btnReleaseFolders.Enabled = true;
                 preferenceInputPanel.ReadOnly = false;
 
                 lblPreviewTitle.Visible = false;
@@ -159,6 +162,7 @@ public partial class MainForm : Form
             case AppState.Processing:
                 btnStartOrganize.Enabled = false;
                 btnStartOrganize.Text = "处理中...";
+                btnReleaseFolders.Enabled = false;
                 preferenceInputPanel.ReadOnly = true;
 
                 statusPanel.Visible = true;
@@ -169,6 +173,7 @@ public partial class MainForm : Form
             case AppState.PreviewReady:
                 btnStartOrganize.Enabled = true;
                 btnStartOrganize.Text = "🔄 重新分析";
+                btnReleaseFolders.Enabled = true;
                 preferenceInputPanel.ReadOnly = false;
 
                 lblPreviewTitle.Visible = true;
@@ -181,6 +186,7 @@ public partial class MainForm : Form
 
             case AppState.Executing:
                 btnStartOrganize.Enabled = false;
+                btnReleaseFolders.Enabled = false;
                 preferenceInputPanel.ReadOnly = true;
                 actionButtonPanel.Visible = false;
 
@@ -191,6 +197,7 @@ public partial class MainForm : Form
             case AppState.Completed:
                 btnStartOrganize.Enabled = true;
                 btnStartOrganize.Text = "🚀 开始整理";
+                btnReleaseFolders.Enabled = true;
                 preferenceInputPanel.ReadOnly = false;
 
                 lblPreviewTitle.Visible = false;
@@ -488,6 +495,47 @@ public partial class MainForm : Form
         base.OnFormClosing(e);
     }
 
+    private async void btnReleaseFolders_Click(object sender, EventArgs e)
+    {
+        await ReleaseFoldersAsync();
+    }
+
+    private async Task ReleaseFoldersAsync()
+    {
+        var confirmResult = MessageBox.Show(
+            "确定要释放桌面上所有文件夹中的文件吗？\n\n此操作将会：\n• 遍历桌面上的所有文件夹（包括子文件夹）\n• 将所有文件移动到桌面根目录\n• 自动处理重名文件（添加数字后缀）\n• 重新扫描桌面文件",
+            "确认释放文件夹",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question);
+
+        if (confirmResult != DialogResult.Yes) return;
+
+        try
+        {
+            UpdateUIForState(AppState.Processing);
+            progressIndicator.SetIndeterminateProgress("正在释放文件夹中的文件...");
+
+            await _organizationService.ReleaseFoldersAsync();
+
+            progressIndicator.SetComplete("释放完成！");
+            await Task.Delay(1500);
+
+            // Refresh desktop scan
+            await RefreshDesktopScanAsync();
+
+            UpdateUIForState(AppState.Ready);
+            ShowInfo("文件夹释放完成！所有文件已移动到桌面根目录。");
+
+            _logger.LogInformation("Folders released successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to release folders");
+            UpdateUIForState(AppState.Ready);
+            ShowError($"释放文件夹时出错: {ex.Message}");
+        }
+    }
+
     // Keyboard shortcuts
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -516,6 +564,14 @@ public partial class MainForm : Form
             case Keys.Control | Keys.Oemcomma: // Ctrl+,
                 btnSettings_Click(this, EventArgs.Empty);
                 return true;
+                
+            case Keys.Control | Keys.Shift | Keys.R: // Ctrl+Shift+R
+                if (btnReleaseFolders.Enabled)
+                {
+                    _ = ReleaseFoldersAsync();
+                    return true;
+                }
+                break;
         }
         
         return base.ProcessCmdKey(ref msg, keyData);

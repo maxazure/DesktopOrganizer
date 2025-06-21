@@ -44,6 +44,7 @@ namespace DesktopOrganizer.UI
             preferenceInputPanel = new PreferenceInputPanel();
             organizeButtonPanel = new Panel();
             btnStartOrganize = new Button();
+            btnReleaseFolders = new Button();
             separatorPanel = new Panel();
             lblPreviewTitle = new Label();
             previewPanel = new FlowLayoutPanel();
@@ -214,6 +215,7 @@ namespace DesktopOrganizer.UI
             // 
             // organizeButtonPanel
             // 
+            organizeButtonPanel.Controls.Add(btnReleaseFolders);
             organizeButtonPanel.Controls.Add(btnStartOrganize);
             organizeButtonPanel.Dock = DockStyle.Top;
             organizeButtonPanel.Location = new Point(20, 210);
@@ -231,13 +233,30 @@ namespace DesktopOrganizer.UI
             btnStartOrganize.FlatStyle = FlatStyle.Flat;
             btnStartOrganize.Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold);
             btnStartOrganize.ForeColor = Color.White;
-            btnStartOrganize.Location = new Point(350, 15);
+            btnStartOrganize.Location = new Point(270, 15);
             btnStartOrganize.Name = "btnStartOrganize";
             btnStartOrganize.Size = new Size(160, 45);
             btnStartOrganize.TabIndex = 0;
             btnStartOrganize.Text = "🚀 开始整理";
             btnStartOrganize.UseVisualStyleBackColor = false;
             btnStartOrganize.Click += btnStartOrganize_Click;
+            
+            // 
+            // btnReleaseFolders
+            // 
+            btnReleaseFolders.Anchor = AnchorStyles.None;
+            btnReleaseFolders.BackColor = Color.FromArgb(168, 85, 247);
+            btnReleaseFolders.FlatAppearance.BorderSize = 0;
+            btnReleaseFolders.FlatStyle = FlatStyle.Flat;
+            btnReleaseFolders.Font = new Font("Microsoft YaHei UI", 14F, FontStyle.Bold);
+            btnReleaseFolders.ForeColor = Color.White;
+            btnReleaseFolders.Location = new Point(450, 15);
+            btnReleaseFolders.Name = "btnReleaseFolders";
+            btnReleaseFolders.Size = new Size(160, 45);
+            btnReleaseFolders.TabIndex = 1;
+            btnReleaseFolders.Text = "📂 释放文件夹";
+            btnReleaseFolders.UseVisualStyleBackColor = false;
+            btnReleaseFolders.Click += btnReleaseFolders_Click;
             
             // 
             // separatorPanel
@@ -416,5 +435,6 @@ namespace DesktopOrganizer.UI
         private Button btnUndo;
         private Panel statusPanel;
         private SimplifiedProgressIndicator progressIndicator;
+        private Button btnReleaseFolders;
     }
 }
