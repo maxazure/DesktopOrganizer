@@ -1,0 +1,57 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VSCode
+.vscode/
+.history/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+
+# Others
+*.DS_Store
+*.swp
+*.bak
+*.tmp
+
+# Test results
+TestResults/
+*.TestResults/
+*.trx
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+*.nuspec
+
+# Rider
+.idea/
+*.sln.iml
+
+# Publish
+publish/
+out/
+
+# Ignore test build outputs
+JsonExtractorTest/bin/
+JsonExtractorTest/obj/
+
+# Ignore local config and cache
+*.cache
+*.pdb
+
+# Ignore solution user-specific files
+*.vs/

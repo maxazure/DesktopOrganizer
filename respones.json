@@ -1,0 +1,240 @@
+{
+    "new_folders": [
+        "Documents",
+        "Pictures",
+        "Music",
+        "3D_Models",
+        "Shortcuts",
+        "Miscellaneous"
+    ],
+    "move_operations": [
+        {
+            "item": "(成绩单）委托书.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "099999微信图片_20250326204211.png",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "123456_20250408104813.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "250579bf20b23820a4186f6d35580d0.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "67.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "6c378acb6d24fd76c4894a91c1b5f8c.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "7c93f16cac2648dda0e7ef3bffdf623.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "a3988fe9-cf0f-4706-a519-eb6e7af4c1f6.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "apple pencil 笔套.skb",
+            "target_folder": "3D_Models"
+        },
+        {
+            "item": "apple pencil 笔套.skp",
+            "target_folder": "3D_Models"
+        },
+        {
+            "item": "apple pencil 笔套.stl",
+            "target_folder": "3D_Models"
+        },
+        {
+            "item": "bitao.stl",
+            "target_folder": "3D_Models"
+        },
+        {
+            "item": "Blender 3.4.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Blinko.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Canva.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "ChatGPT Image 2025年4月16日 19_15_12.png",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "ChatGPT Image 2025年4月8日 11_10_16.png",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "Claude.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Codespaces.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "CV-Sara-Liu-Finalized-Chinese.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "Document Title.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "GitHub Desktop.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Google Keep.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Haixia - Chrome.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "ir330-apr-19.pdf",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "paknsave_products_2025-03-24.txt",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "Passport-Haixia Liu.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "Project experience - Haixia Liu.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "Roblox Studio.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Sara01.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "Sara02.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "sarah.png",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "sarah1.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "screenshot-1743987038912000.png",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "screenshot-1743987867074888888.png",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "shashibiya.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "Student ID.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "svg2png-electron.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Trae.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "Visa Haixia Liu.pdf",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "WeChat.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "zuofan_20250316214818.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "委托书.docx",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "小说文本.lnk",
+            "target_folder": "Shortcuts"
+        },
+        {
+            "item": "微111111信图片_20250408105405.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "微信图片_20221031102855.jpg",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "新建 Text Document (2).txt",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "新建 Text Document (3).txt",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "新建 Text Document.txt",
+            "target_folder": "Documents"
+        },
+        {
+            "item": "未命名.mp3",
+            "target_folder": "Music"
+        },
+        {
+            "item": "未标题-2.gif",
+            "target_folder": "Pictures"
+        },
+        {
+            "item": "测试模板音频.mp3",
+            "target_folder": "Music"
+        },
+        {
+            "item": "测试模板音频2.mp3",
+            "target_folder": "Music"
+        },
+        {
+            "item": "清晨的叹息-源文件 - 副本.aup3",
+            "target_folder": "Miscellaneous"
+        },
+        {
+            "item": "清晨的叹息-源文件.aup3",
+            "target_folder": "Miscellaneous"
+        },
+        {
+            "item": "清晨的叹息.mp3",
+            "target_folder": "Music"
+        },
+        {
+            "item": "剪映专业版.lnk",
+            "target_folder": "Shortcuts"
+        }
+    ]
+}
